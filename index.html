@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Jira Nudge Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;
+  --card:#1a2033;--border:#2a3248;
+  --accent:#4f8ef7;--accent2:#38c88a;
+  --warn:#f5a623;--danger:#e05252;
+  --text:#e8ecf4;--muted:#7b8aaa;
+  --mono:'Courier New',monospace;
+  --sans:'Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh}
+
+/* ── Topbar ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 24px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;gap:12px;flex-wrap:wrap}
+.logo{font-size:17px;font-weight:700;letter-spacing:-.5px;color:var(--text)}
+.logo span{color:var(--accent)}
+.topbar-left{display:flex;align-items:center;gap:14px}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.status-pill{display:flex;align-items:center;gap:6px;padding:4px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--muted)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--danger);flex-shrink:0}
+.dot.on{background:var(--accent2);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:7px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;cursor:pointer;font-family:var(--sans);transition:all .15s;white-space:nowrap}
+.btn:hover{background:var(--border)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:#3a7ae0}
+.btn.success{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.btn.danger{background:var(--danger);border-color:var(--danger);color:#fff}
+.btn.sm{padding:4px 10px;font-size:12px;border-radius:5px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn svg{width:14px;height:14px;flex-shrink:0}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:0;padding:0 24px;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto}
+.tab{padding:11px 16px;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;user-select:none;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500}
+.tab-new-badge{display:inline-block;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:5px;vertical-align:middle}
+
+/* ── Layout ── */
+.content{padding:20px 24px}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+/* ── Cards / Metrics ── */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:700px){.metrics{grid-template-columns:repeat(2,1fr)}}
+.metric{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:15px 17px}
+.metric-label{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:7px}
+.metric-val{font-size:27px;font-weight:700;line-height:1}
+.metric-val.green{color:var(--accent2)}
+.metric-val.blue{color:var(--accent)}
+.metric-val.amber{color:var(--warn)}
+.metric-sub{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* ── Table ── */
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.table-header{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--border);gap:8px;flex-wrap:wrap}
+.table-title{font-weight:600;font-size:14px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:9px 13px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);background:var(--bg3);border-bottom:1px solid var(--border);font-weight:500;white-space:nowrap}
+td{padding:10px 13px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+
+/* ── Badges ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.badge-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.bg-green{background:rgba(56,200,138,.13);color:var(--accent2)}
+.bg-blue{background:rgba(79,142,247,.13);color:var(--accent)}
+.bg-amber{background:rgba(245,166,35,.13);color:var(--warn)}
+.bg-red{background:rgba(224,82,82,.13);color:var(--danger)}
+.bg-gray{background:rgba(123,138,170,.1);color:var(--muted)}
+
+/* ── Avatar ── */
+.av{width:28px;height:28px;border-radius:50%;background:rgba(79,142,247,.18);color:var(--accent);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.av-cell{display:flex;align-items:center;gap:8px}
+
+/* ── Key link ── */
+.kl{color:var(--accent);font-family:var(--mono);font-size:12px;text-decoration:none}
+.kl:hover{text-decoration:underline}
+
+/* ── Run strip ── */
+.run-strip{display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 15px;margin-bottom:18px;font-size:12px;color:var(--muted);flex-wrap:wrap;gap:8px}
+.run-strip span{color:var(--text);font-weight:500}
+
+/* ── Spinner ── */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Overlays ── */
+.ov-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
+.ov-bg.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:14px;width:540px;max-width:100%;padding:26px;position:relative;animation:slideUp .18s ease;max-height:90vh;overflow-y:auto}
+@keyframes slideUp{from{transform:translateY(18px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:5px}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:20px}
+.modal-x{position:absolute;top:15px;right:17px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1}
+.modal-x:hover{color:var(--text)}
+.fg{margin-bottom:13px}
+.fl{font-size:12px;color:var(--muted);margin-bottom:5px;display:block;font-weight:500}
+.fi{width:100%;padding:8px 11px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:13px;outline:none;font-family:var(--mono);transition:border-color .15s}
+.fi:focus{border-color:var(--accent)}
+.fi::placeholder{color:var(--muted);opacity:.55}
+.fi.sans{font-family:var(--sans)}
+.modal-actions{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.conn-st{padding:8px 12px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--muted);margin-top:10px;min-height:34px;display:flex;align-items:center;gap:7px}
+.conn-st.ok{color:var(--accent2)}
+.conn-st.err{color:var(--danger)}
+
+/* ── Roster section header ── */
+.sect-head{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin:20px 0 10px}
+
+/* ── Roster card (person card) ── */
+.roster-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:20px}
+.p-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;transition:border-color .15s}
+.p-card:hover{border-color:rgba(79,142,247,.4)}
+.p-card-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+.p-av{width:38px;height:38px;border-radius:50%;background:rgba(79,142,247,.2);color:var(--accent);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.p-name{font-weight:600;font-size:14px;line-height:1.2;margin-bottom:3px}
+.p-role{font-size:11px;color:var(--muted)}
+.p-fields{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}
+.p-field{font-size:11px}
+.p-field-label{color:var(--muted);margin-bottom:2px}
+.p-field-val{color:var(--text);font-family:var(--mono);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.p-field-val.sans{font-family:var(--sans)}
+.p-actions{position:absolute;top:12px;right:12px;display:flex;gap:6px}
+.p-comp{display:inline-block;background:rgba(79,142,247,.12);color:var(--accent);font-size:10px;padding:2px 7px;border-radius:3px;font-weight:600;margin-top:6px}
+.warn-banner{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.25);border-radius:7px;padding:10px 14px;font-size:12px;color:var(--warn);margin-bottom:16px}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 16px;font-size:13px;z-index:999;animation:fadeIn .2s ease;max-width:320px}
+.toast.ok{border-left:3px solid var(--accent2)}
+.toast.err{border-left:3px solid var(--danger)}
+.toast.info{border-left:3px solid var(--accent)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Charts ── */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+@media(max-width:700px){.charts-grid{grid-template-columns:1fr}}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px}
+.chart-card h3{font-size:13px;font-weight:600;margin-bottom:14px;color:var(--text)}
+.chart-card canvas{max-height:230px}
+.chart-card.full{grid-column:1/-1}
+
+/* ── DL options ── */
+.dl-opt{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:border-color .15s;margin-bottom:9px}
+.dl-opt:hover{border-color:var(--accent)}
+.dl-icon{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.dl-opt-info{flex:1}
+.dl-opt-title{font-weight:600;font-size:13px}
+.dl-opt-sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* ── Misc ── */
+.due-t{color:var(--warn);font-weight:600}
+.needs-update td{background:rgba(245,166,35,.04)!important}
+.empty-state{text-align:center;padding:44px 20px;color:var(--muted);font-size:13px}
+.divider{border:none;border-top:1px solid var(--border);margin:18px 0}
+.info-box{background:rgba(79,142,247,.07);border:1px solid rgba(79,142,247,.2);border-radius:7px;padding:10px 14px;font-size:12px;color:var(--accent);margin-bottom:16px}
+</style>
+</head>
+<body>
+
+<!-- ══ TOPBAR ══ -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">Jira<span>Nudge</span></div>
+    <div class="status-pill">
+      <span class="dot" id="connDot"></span>
+      <span id="connLabel">Not connected</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button class="btn" onclick="openConfig()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg>
+      Connect to Jira
+    </button>
+    <button class="btn primary" onclick="openDl()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1v9M5 7l3 3 3-3M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2"/></svg>
+      Download Report
+    </button>
+  </div>
+</div>
+
+<!-- ══ TABS ══ -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab(0)">Team Roster <span class="tab-new-badge">MAP</span></div>
+  <div class="tab" onclick="switchTab(1)">Dispatch Monitor</div>
+  <div class="tab" onclick="switchTab(2)">Burndown &amp; Analytics</div>
+</div>
+
+<!-- ══ CONTENT ══ -->
+<div class="content">
+
+<!-- ─── TAB 0: TEAM ROSTER ─────────────────────────────────────── -->
+<div class="tab-pane active" id="tab0">
+
+  <div class="warn-banner">
+    Complete this roster before running Fetch &amp; Nudge. Each person needs their Jira account ID and Teams UPN/email so the right person gets the right DM. Jira account IDs are GUIDs — find them in Jira Settings → User Management, or hover over a user's avatar in any issue.
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div style="font-size:15px;font-weight:600">Team members</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn sm" onclick="importJiraUsers()" id="importBtn" disabled title="Auto-import from Jira project members">
+        <span class="spin" id="importSpin" style="display:none"></span>
+        Auto-import from Jira
+      </button>
+      <button class="btn sm primary" onclick="openAddPerson()">+ Add person</button>
+    </div>
+  </div>
+
+  <div class="roster-grid" id="rosterGrid">
+    <div class="empty-state">No team members yet.<br>Click <strong>+ Add person</strong> or <strong>Auto-import from Jira</strong> after connecting.</div>
+  </div>
+
+  <div class="sect-head">Components / teams</div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+    <input class="fi sans" id="newComp" placeholder="Add component or team name (e.g. Backend, QA, Platform)" style="max-width:360px"/>
+    <button class="btn sm" onclick="addComponent()">Add</button>
+  </div>
+  <div id="compList" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px"></div>
+
+  <div class="info-box">
+    <strong>How Fetch &amp; Nudge uses this roster:</strong> When a Jira story is fetched, the assignee's account ID is looked up here to find their Teams UPN. If no mapping exists the story is flagged as "Unmapped" in the dispatch table — no DM is sent until you add them.
+  </div>
+</div>
+
+<!-- ─── TAB 1: DISPATCH MONITOR ──────────────────────────────────── -->
+<div class="tab-pane" id="tab1">
+
+  <div class="run-strip">
+    <span id="runInfo">Connect to Jira, complete the roster, then click Fetch &amp; Nudge.</span>
+    <div style="display:flex;gap:8px">
+      <button class="btn sm" onclick="checkComments()" id="checkBtn" disabled>Check post-nudge comments</button>
+      <button class="btn sm primary" onclick="fetchAndNudge()" id="runBtn" disabled>
+        <span class="spin" id="runSpin" style="display:none"></span>
+        Fetch &amp; Nudge
+      </button>
+    </div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Stories checked</div><div class="metric-val blue" id="mTotal">—</div><div class="metric-sub">due today / tomorrow</div></div>
+    <div class="metric"><div class="metric-label">Nudges sent</div><div class="metric-val green" id="mSent">—</div><div class="metric-sub">Teams DM dispatched</div></div>
+    <div class="metric"><div class="metric-label">Already updated</div><div class="metric-val" id="mUpdated">—</div><div class="metric-sub">comment in last 24 hrs</div></div>
+    <div class="metric"><div class="metric-label">Skipped / unmapped</div><div class="metric-val amber" id="mSkipped">—</div><div class="metric-sub">blocked or no roster entry</div></div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-header">
+      <span class="table-title">Dispatch log</span>
+      <span style="font-size:12px;color:var(--muted)" id="runTime"></span>
+    </div>
+    <div style="overflow-x:auto">
+    <table id="dispatchTable">
+      <thead><tr>
+        <th>Story</th><th>Summary</th><th>Jira assignee</th>
+        <th>Teams name</th><th>Component</th><th>Due</th>
+        <th>Action</th><th>Nudge sent</th><th>Post-nudge comment</th><th></th>
+      </tr></thead>
+      <tbody id="dispatchBody">
+        <tr><td colspan="10"><div class="empty-state">Connect and run Fetch &amp; Nudge to populate this table.</div></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+  <div style="margin-top:8px;font-size:11px;color:var(--muted);text-align:right" id="groupNote"></div>
+</div>
+
+<!-- ─── TAB 2: BURNDOWN & ANALYTICS ──────────────────────────────── -->
+<div class="tab-pane" id="tab2">
+  <div class="run-strip">
+    <span id="analyticsInfo">Connect to Jira to load analytics.</span>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:12px;color:var(--muted)">Sprint:</span>
+      <select id="sprintSel" class="fi sans" style="width:210px;padding:5px 9px;font-family:var(--sans)" disabled onchange="loadBurndown()"><option>— select sprint —</option></select>
+      <button class="btn sm" onclick="loadAnalytics()" id="analyticsBtn" disabled>Load</button>
+    </div>
+  </div>
+  <div class="info-box">CORS note: API calls route through corsproxy.io — a free open proxy. No credentials stored; read-only GET requests only.</div>
+  <div class="charts-grid">
+    <div class="chart-card full"><h3>Sprint burndown</h3><canvas id="burndownChart"></canvas></div>
+    <div class="chart-card"><h3>Story status distribution</h3><canvas id="statusChart"></canvas></div>
+    <div class="chart-card"><h3>Assignee workload</h3><canvas id="workloadChart"></canvas></div>
+  </div>
+  <div class="table-wrap" style="margin-top:20px">
+    <div class="table-header"><span class="table-title">Cycle time &amp; lead time per story</span><span style="font-size:12px;color:var(--muted)">In Progress → Done | Created → Done</span></div>
+    <div style="overflow-x:auto">
+    <table><thead><tr>
+      <th>Key</th><th>Summary</th><th>Assignee</th><th>Created</th><th>In Progress</th><th>Done</th><th>Lead time</th><th>Cycle time</th>
+    </tr></thead><tbody id="cycleBody"><tr><td colspan="8"><div class="empty-state">Load analytics to see cycle &amp; lead times.</div></td></tr></tbody></table>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<!-- ══ MODALS ══ -->
+
+<!-- Config modal -->
+<div class="ov-bg" id="cfgOv">
+<div class="modal">
+  <button class="modal-x" onclick="closeOv('cfgOv')">×</button>
+  <div class="modal-title">Connect to Jira</div>
+  <div class="modal-sub">Credentials live in memory only — cleared when you close the browser tab. Never written to disk.</div>
+  <div class="fg"><label class="fl">Jira base URL</label><input class="fi" id="cfgBase" placeholder="https://your-domain.atlassian.net" type="url"/></div>
+  <div class="fg"><label class="fl">Jira email</label><input class="fi" id="cfgEmail" placeholder="you@company.com" type="email"/></div>
+  <div class="fg"><label class="fl">Jira API token <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank" style="color:var(--accent);font-size:11px;margin-left:6px">Get token ↗</a></label><input class="fi" id="cfgToken" placeholder="YOUR_JIRA_API_TOKEN" type="password"/></div>
+  <div class="fg"><label class="fl">Project key</label><input class="fi" id="cfgProject" placeholder="PROJ" oninput="this.value=this.value.toUpperCase()"/></div>
+  <hr class="divider"/>
+  <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:10px">Microsoft Teams (optional — for sending DMs)</div>
+  <div class="fg"><label class="fl">MS Graph access token <a href="https://learn.microsoft.com/en-us/graph/auth/" target="_blank" style="color:var(--accent);font-size:11px;margin-left:6px">Docs ↗</a></label><input class="fi" id="cfgGraph" placeholder="Bearer token from Azure AD" type="password"/></div>
+  <div class="conn-st" id="cfgStatus">Status will appear here after testing.</div>
+  <div class="modal-actions">
+    <button class="btn success" onclick="saveAndConnect()">Connect</button>
+    <button class="btn" onclick="testConn()"><span class="spin" id="testSpin" style="display:none"></span>Test connection</button>
+    <button class="btn" onclick="saveCfg()">Save config</button>
+  </div>
+</div>
+</div>
+
+<!-- Add person modal -->
+<div class="ov-bg" id="personOv">
+<div class="modal">
+  <button class="modal-x" onclick="closeOv('personOv')">×</button>
+  <div class="modal-title" id="personModalTitle">Add team member</div>
+  <div class="modal-sub">Map a Jira assignee to their Microsoft Teams identity. All fields except Jira account ID are editable later.</div>
+  <input type="hidden" id="editIdx" value="-1"/>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="fg" style="grid-column:1/-1"><label class="fl">Display name (as you want to see it)</label><input class="fi sans" id="pName" placeholder="e.g. Rahul Kulkarni"/></div>
+    <div class="fg"><label class="fl">Role / title</label><input class="fi sans" id="pRole" placeholder="e.g. Senior Dev"/></div>
+    <div class="fg"><label class="fl">Component / team</label><select class="fi sans" id="pComp"><option value="">— none —</option></select></div>
+    <div class="fg" style="grid-column:1/-1"><label class="fl">Jira account ID (GUID) <span style="font-size:11px;color:var(--muted);font-weight:400">— find in Jira Settings → User Management</span></label><input class="fi" id="pJiraId" placeholder="5b10a2844c20165700ede21g"/></div>
+    <div class="fg" style="grid-column:1/-1"><label class="fl">Jira display name <span style="font-size:11px;color:var(--muted);font-weight:400">— exactly as shown on Jira issues</span></label><input class="fi sans" id="pJiraName" placeholder="rk_dev01 or Rahul K."/></div>
+    <div class="fg" style="grid-column:1/-1"><label class="fl">Teams UPN / email <span style="font-size:11px;color:var(--muted);font-weight:400">— their Microsoft 365 login (used to send DM)</span></label><input class="fi" id="pTeamsUPN" placeholder="rahul.kulkarni@company.com"/></div>
+    <div class="fg" style="grid-column:1/-1"><label class="fl">Teams display name <span style="font-size:11px;color:var(--muted);font-weight:400">— name as it appears in Teams chat</span></label><input class="fi sans" id="pTeamsName" placeholder="Rahul Kulkarni"/></div>
+  </div>
+  <div class="modal-actions">
+    <button class="btn primary" onclick="savePerson()">Save</button>
+    <button class="btn" onclick="closeOv('personOv')">Cancel</button>
+  </div>
+</div>
+</div>
+
+<!-- Download modal -->
+<div class="ov-bg" id="dlOv">
+<div class="modal" style="width:400px">
+  <button class="modal-x" onclick="closeOv('dlOv')">×</button>
+  <div class="modal-title">Download report</div>
+  <div class="modal-sub">Exports today's dispatch status. No server needed — everything is inline.</div>
+  <div class="dl-opt" onclick="downloadPDF()"><div class="dl-icon" style="background:rgba(224,82,82,.15);color:var(--danger)">PDF</div><div class="dl-opt-info"><div class="dl-opt-title">PDF report</div><div class="dl-opt-sub">Opens print dialog — save as PDF</div></div></div>
+  <div class="dl-opt" onclick="downloadCSV()"><div class="dl-icon" style="background:rgba(56,200,138,.15);color:var(--accent2)">CSV</div><div class="dl-opt-info"><div class="dl-opt-title">CSV export</div><div class="dl-opt-sub">Spreadsheet-friendly, all dispatch rows</div></div></div>
+  <div class="dl-opt" onclick="downloadHTML()"><div class="dl-icon" style="background:rgba(79,142,247,.15);color:var(--accent)">HTM</div><div class="dl-opt-info"><div class="dl-opt-title">Snapshot HTML</div><div class="dl-opt-sub">Email-safe, self-contained snapshot</div></div></div>
+</div>
+</div>
+
+<!-- ══ SCRIPT ══ -->
+<script>
+// ── State ───────────────────────────────────────────────────────────────────
+const S = {
+  cfg: {base:'',email:'',token:'',project:'',graph:''},
+  connected: false,
+  roster: [],       // [{id, name, role, comp, jiraId, jiraName, teamsUPN, teamsName}]
+  components: [],   // [string]
+  rows: [],         // dispatch rows
+  analyticsRows: [],
+  sprints: [],
+  charts: {},
+  lastRun: null
+};
+
+const PROXY = 'https://corsproxy.io/?';
+
+// ── Tabs ────────────────────────────────────────────────────────────────────
+function switchTab(i) {
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i===j));
+  document.querySelectorAll('.tab-pane').forEach((p,j)=>p.classList.toggle('active',i===j));
+  if(i===2 && S.connected) loadAnalytics();
+}
+
+// ── Overlay helpers ──────────────────────────────────────────────────────────
+function openOv(id){document.getElementById(id).classList.add('open')}
+function closeOv(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.ov-bg').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open')}));
+
+// ── Config ───────────────────────────────────────────────────────────────────
+function openConfig(){
+  const c=S.cfg;
+  if(c.base)    document.getElementById('cfgBase').value=c.base;
+  if(c.email)   document.getElementById('cfgEmail').value=c.email;
+  if(c.token)   document.getElementById('cfgToken').value=c.token;
+  if(c.project) document.getElementById('cfgProject').value=c.project;
+  if(c.graph)   document.getElementById('cfgGraph').value=c.graph;
+  openOv('cfgOv');
+}
+function readForm(){
+  return{
+    base:   document.getElementById('cfgBase').value.trim().replace(/\/$/,''),
+    email:  document.getElementById('cfgEmail').value.trim(),
+    token:  document.getElementById('cfgToken').value.trim(),
+    project:document.getElementById('cfgProject').value.trim().toUpperCase(),
+    graph:  document.getElementById('cfgGraph').value.trim()
+  };
+}
+function setCfgStatus(msg,type){
+  const el=document.getElementById('cfgStatus');
+  el.textContent=msg; el.className='conn-st'+(type?' '+type:'');
+}
+function saveCfg(){
+  const f=readForm();
+  if(!f.base||!f.email||!f.token||!f.project){setCfgStatus('Fill all Jira fields first.','err');return;}
+  Object.assign(S.cfg,f); setCfgStatus('Config saved in memory.','ok'); toast('Config saved.','ok');
+}
+async function testConn(){
+  const f=readForm();
+  if(!f.base||!f.email||!f.token){setCfgStatus('Fill Jira URL, email and token first.','err');return;}
+  document.getElementById('testSpin').style.display='inline-block';
+  setCfgStatus('Testing…','');
+  try{
+    const res=await fetch(`${PROXY}${encodeURIComponent(f.base+'/rest/api/3/myself')}`,{headers:authH(f)});
+    if(res.ok){const me=await res.json();setCfgStatus(`Connected as: ${me.displayName}  (${me.emailAddress})`,'ok');}
+    else setCfgStatus(`Error ${res.status} — check credentials.`,'err');
+  }catch(e){setCfgStatus('Network error — check URL or proxy.','err');}
+  document.getElementById('testSpin').style.display='none';
+}
+async function saveAndConnect(){
+  saveCfg();
+  await testConn();
+  if(document.getElementById('cfgStatus').classList.contains('ok')){
+    S.connected=true;
+    document.getElementById('connDot').classList.add('on');
+    document.getElementById('connLabel').textContent=`Connected · ${S.cfg.project}`;
+    document.getElementById('runBtn').disabled=false;
+    document.getElementById('checkBtn').disabled=false;
+    document.getElementById('analyticsBtn').disabled=false;
+    document.getElementById('sprintSel').disabled=false;
+    document.getElementById('importBtn').disabled=false;
+    closeOv('cfgOv');
+    toast('Connected to Jira!','ok');
+  }
+}
+function authH(cfg){
+  return{'Authorization':'Basic '+btoa(`${cfg.email}:${cfg.token}`),'Content-Type':'application/json','Accept':'application/json'};
+}
+async function jiraGet(path){
+  const res=await fetch(`${PROXY}${encodeURIComponent(S.cfg.base+path)}`,{headers:authH(S.cfg)});
+  if(!res.ok) throw new Error(`Jira ${res.status}`);
+  return res.json();
+}
+
+// ── Roster ───────────────────────────────────────────────────────────────────
+function initials(n){if(!n)return'?';return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+
+function renderRoster(){
+  const grid=document.getElementById('rosterGrid');
+  if(!S.roster.length){
+    grid.innerHTML='<div class="empty-state">No team members yet.<br>Click <strong>+ Add person</strong> or <strong>Auto-import from Jira</strong> after connecting.</div>';
+    return;
+  }
+  grid.innerHTML=S.roster.map((p,i)=>`
+    <div class="p-card">
+      <div class="p-actions">
+        <button class="btn sm" onclick="editPerson(${i})">Edit</button>
+        <button class="btn sm danger" onclick="removePerson(${i})">✕</button>
+      </div>
+      <div class="p-card-top">
+        <div class="p-av">${initials(p.name)}</div>
+        <div>
+          <div class="p-name">${p.name||'—'}</div>
+          <div class="p-role">${p.role||'No role set'}</div>
+          ${p.comp?`<span class="p-comp">${p.comp}</span>`:''}
+        </div>
+      </div>
+      <div class="p-fields">
+        <div class="p-field"><div class="p-field-label">Jira account ID</div><div class="p-field-val" title="${p.jiraId||''}">${p.jiraId||'—'}</div></div>
+        <div class="p-field"><div class="p-field-label">Jira display name</div><div class="p-field-val sans">${p.jiraName||'—'}</div></div>
+        <div class="p-field"><div class="p-field-label">Teams UPN</div><div class="p-field-val" title="${p.teamsUPN||''}">${p.teamsUPN||'—'}</div></div>
+        <div class="p-field"><div class="p-field-label">Teams name</div><div class="p-field-val sans">${p.teamsName||'—'}</div></div>
+      </div>
+    </div>`).join('');
+}
+
+function refreshCompSelect(){
+  const sel=document.getElementById('pComp');
+  sel.innerHTML='<option value="">— none —</option>'+S.components.map(c=>`<option value="${c}">${c}</option>`).join('');
+}
+
+function addComponent(){
+  const v=document.getElementById('newComp').value.trim();
+  if(!v)return;
+  if(!S.components.includes(v)){S.components.push(v);renderCompList();refreshCompSelect();}
+  document.getElementById('newComp').value='';
+}
+
+function removeComp(c){
+  S.components=S.components.filter(x=>x!==c);
+  renderCompList(); refreshCompSelect();
+}
+
+function renderCompList(){
+  document.getElementById('compList').innerHTML=S.components.map(c=>`
+    <div style="display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:4px 10px;font-size:12px">
+      ${c} <span onclick="removeComp('${c}')" style="cursor:pointer;color:var(--muted);font-size:14px;line-height:1">×</span>
+    </div>`).join('');
+}
+
+function openAddPerson(){
+  document.getElementById('personModalTitle').textContent='Add team member';
+  document.getElementById('editIdx').value='-1';
+  ['pName','pRole','pJiraId','pJiraName','pTeamsUPN','pTeamsName'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pComp').value='';
+  refreshCompSelect();
+  openOv('personOv');
+}
+
+function editPerson(i){
+  const p=S.roster[i];
+  document.getElementById('personModalTitle').textContent='Edit team member';
+  document.getElementById('editIdx').value=i;
+  document.getElementById('pName').value=p.name||'';
+  document.getElementById('pRole').value=p.role||'';
+  document.getElementById('pJiraId').value=p.jiraId||'';
+  document.getElementById('pJiraName').value=p.jiraName||'';
+  document.getElementById('pTeamsUPN').value=p.teamsUPN||'';
+  document.getElementById('pTeamsName').value=p.teamsName||'';
+  refreshCompSelect();
+  document.getElementById('pComp').value=p.comp||'';
+  openOv('personOv');
+}
+
+function savePerson(){
+  const n=document.getElementById('pName').value.trim();
+  if(!n){toast('Display name is required.','err');return;}
+  const p={
+    name:n,
+    role:document.getElementById('pRole').value.trim(),
+    comp:document.getElementById('pComp').value,
+    jiraId:document.getElementById('pJiraId').value.trim(),
+    jiraName:document.getElementById('pJiraName').value.trim(),
+    teamsUPN:document.getElementById('pTeamsUPN').value.trim(),
+    teamsName:document.getElementById('pTeamsName').value.trim()
+  };
+  const idx=parseInt(document.getElementById('editIdx').value);
+  if(idx>=0) S.roster[idx]=p;
+  else S.roster.push(p);
+  renderRoster();
+  closeOv('personOv');
+  toast(idx>=0?'Person updated.':'Person added.','ok');
+}
+
+function removePerson(i){
+  if(!confirm(`Remove ${S.roster[i].name} from the roster?`))return;
+  S.roster.splice(i,1);
+  renderRoster();
+  toast('Person removed.','info');
+}
+
+// Auto-import from Jira project members
+async function importJiraUsers(){
+  if(!S.connected){toast('Connect to Jira first.','err');return;}
+  document.getElementById('importSpin').style.display='inline-block';
+  document.getElementById('importBtn').disabled=true;
+  try{
+    // Get project roles to find members
+    const rolesData=await jiraGet(`/rest/api/3/project/${S.cfg.project}/role`);
+    const roleUrls=Object.values(rolesData);
+    let users=[];
+    for(const url of roleUrls.slice(0,5)){
+      try{
+        const path=url.replace(S.cfg.base,'');
+        const role=await jiraGet(path);
+        (role.actors||[]).forEach(a=>{
+          if(a.type==='atlassian-user-role-actor' && !users.find(u=>u.accountId===a.actorUser?.accountId)){
+            users.push({accountId:a.actorUser?.accountId, displayName:a.displayName, emailAddress:a.actorUser?.accountId});
+          }
+        });
+      }catch(e){}
+    }
+    let added=0;
+    users.forEach(u=>{
+      if(!S.roster.find(r=>r.jiraId===u.accountId)){
+        S.roster.push({
+          name:u.displayName,role:'',comp:'',
+          jiraId:u.accountId,jiraName:u.displayName,
+          teamsUPN:'',teamsName:u.displayName
+        });
+        added++;
+      }
+    });
+    renderRoster();
+    toast(`Imported ${added} new member(s). Add their Teams UPN to enable DMs.`,'ok');
+  }catch(e){
+    toast('Import failed: '+e.message,'err');
+  }
+  document.getElementById('importSpin').style.display='none';
+  document.getElementById('importBtn').disabled=false;
+}
+
+// ── Lookup helper ────────────────────────────────────────────────────────────
+function lookupByJiraId(accountId){
+  return S.roster.find(r=>r.jiraId===accountId);
+}
+function lookupByJiraName(displayName){
+  if(!displayName)return null;
+  const dn=displayName.toLowerCase();
+  return S.roster.find(r=>
+    (r.jiraId&&r.jiraId===displayName)||
+    (r.jiraName&&r.jiraName.toLowerCase()===dn)||
+    (r.name&&r.name.toLowerCase()===dn)
+  );
+}
+
+// ── Fetch & Nudge ────────────────────────────────────────────────────────────
+async function fetchAndNudge(){
+  if(!S.connected){toast('Connect to Jira first.','err');return;}
+  const btn=document.getElementById('runBtn');
+  const sp=document.getElementById('runSpin');
+  btn.disabled=true; sp.style.display='inline-block';
+  document.getElementById('dispatchBody').innerHTML='<tr><td colspan="10"><div class="empty-state"><span class="spin"></span>&nbsp; Fetching stories…</div></td></tr>';
+
+  const jql=encodeURIComponent(`project=${S.cfg.project} AND due>=startOfDay() AND due<=endOfDay("+1d") AND status NOT IN ("Blocked","On Hold") AND assignee is not EMPTY`);
+  let issues=[];
+  try{
+    const data=await jiraGet(`/rest/api/3/search?jql=${jql}&maxResults=50&fields=summary,assignee,due,comment,status,created`);
+    issues=data.issues||[];
+  }catch(e){
+    toast('Failed to fetch: '+e.message,'err');
+    btn.disabled=false; sp.style.display='none';
+    document.getElementById('dispatchBody').innerHTML=`<tr><td colspan="10"><div class="empty-state" style="color:var(--danger)">Error: ${e.message}</div></td></tr>`;
+    return;
+  }
+
+  const now=new Date();
+  const cutoff=new Date(now-86400000);
+  S.rows=[]; S.lastRun=now;
+
+  for(const issue of issues){
+    const f=issue.fields;
+    const comments=f.comment?.comments||[];
+    const last=comments.length?comments[comments.length-1]:null;
+    const hasRecent=last&&new Date(last.created)>cutoff;
+    const status=f.status?.name||'';
+
+    // Roster lookup — try by account ID first, then display name
+    const jiraAccountId=f.assignee?.accountId||'';
+    const jiraDisplayName=f.assignee?.displayName||'';
+    const member=lookupByJiraId(jiraAccountId)||lookupByJiraName(jiraDisplayName);
+
+    let action='sent';
+    if(hasRecent) action='has_comment';
+    if(!member||!member.teamsUPN) action= action==='sent'?'unmapped':action;
+
+    const row={
+      key:issue.key,
+      summary:f.summary,
+      jiraName:jiraDisplayName,
+      jiraAccountId,
+      teamsName:member?.teamsName||'—',
+      teamsUPN:member?.teamsUPN||'',
+      comp:member?.comp||'—',
+      due:f.due,
+      status,
+      action,
+      nudgeSentAt:null,
+      postNudgeComment:null
+    };
+
+    if(action==='sent'&&member?.teamsUPN&&S.cfg.graph){
+      try{
+        await sendTeamsDM(member.teamsUPN,row);
+        row.nudgeSentAt=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+      }catch(e){row.action='dm_failed';row.nudgeSentAt='Error: '+e.message;}
+    } else if(action==='sent'){
+      row.nudgeSentAt='(no Graph token)';
+    }
+
+    S.rows.push(row);
+  }
+
+  renderDispatch();
+  updateMetrics();
+  document.getElementById('runTime').textContent=`Last run: ${now.toLocaleTimeString('en-IN')}`;
+  document.getElementById('runInfo').innerHTML=`<span>Run at ${now.toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'})}</span>`;
+  const sent=S.rows.filter(r=>r.action==='sent').length;
+  toast(`${issues.length} stories fetched · ${sent} nudge(s) sent.`,'ok');
+  btn.disabled=false; sp.style.display='none';
+}
+
+async function sendTeamsDM(upn,row){
+  // Resolve user
+  const uRes=await fetch(`https://graph.microsoft.com/v1.0/users/${encodeURIComponent(upn)}`,{headers:{Authorization:`Bearer ${S.cfg.graph}`}});
+  if(!uRes.ok) throw new Error('User not found in Graph');
+  const user=await uRes.json();
+  // Create chat
+  const chatRes=await fetch('https://graph.microsoft.com/v1.0/chats',{
+    method:'POST',
+    headers:{Authorization:`Bearer ${S.cfg.graph}`,'Content-Type':'application/json'},
+    body:JSON.stringify({chatType:'oneOnOne',members:[
+      {'@odata.type':'#microsoft.graph.aadUserConversationMember',roles:['owner'],'user@odata.bind':`https://graph.microsoft.com/v1.0/users/${user.id}`}
+    ]})
+  });
+  const chat=await chatRes.json();
+  const msg=`Hi ${row.teamsName} — reminder before 5 PM IST\n\n${row.key}: ${row.summary}\nDue: ${row.due}\nStatus: ${row.status}\n\nNo Jira comment added in the last 24 hrs. Please update the story.\n\nView: ${S.cfg.base}/browse/${row.key}`;
+  await fetch(`https://graph.microsoft.com/v1.0/chats/${chat.id}/messages`,{
+    method:'POST',
+    headers:{Authorization:`Bearer ${S.cfg.graph}`,'Content-Type':'application/json'},
+    body:JSON.stringify({body:{contentType:'text',content:msg}})
+  });
+}
+
+function isToday(d){const t=new Date(),s=new Date(d);return t.toDateString()===s.toDateString();}
+function isTomorrow(d){const t=new Date();t.setDate(t.getDate()+1);return t.toDateString()===new Date(d).toDateString();}
+function fmt(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short'});}
+
+function renderDispatch(){
+  const tbody=document.getElementById('dispatchBody');
+  if(!S.rows.length){tbody.innerHTML='<tr><td colspan="10"><div class="empty-state">No stories found.</div></td></tr>';return;}
+
+  // Grouped nudge note
+  const grp={};
+  S.rows.filter(r=>r.action==='sent').forEach(r=>{grp[r.teamsName]=(grp[r.teamsName]||0)+1;});
+  document.getElementById('groupNote').textContent=Object.keys(grp).length?'Grouped: '+Object.entries(grp).map(([n,c])=>`${n}: ${c} stor${c>1?'ies':'y'}`).join(' · '):'';
+
+  tbody.innerHTML=S.rows.map((r,i)=>{
+    const dueCell=r.due?(isToday(r.due)?`<span class="due-t">Today</span>`:`<span style="color:var(--muted)">Tomorrow</span>`):'—';
+
+    const badge=
+      r.action==='sent'?      `<span class="badge bg-green"><span class="badge-dot"></span>Sent</span>`:
+      r.action==='has_comment'?`<span class="badge bg-gray"><span class="badge-dot"></span>Has comment</span>`:
+      r.action==='unmapped'?  `<span class="badge bg-amber"><span class="badge-dot"></span>Unmapped</span>`:
+      r.action==='dm_failed'? `<span class="badge bg-red"><span class="badge-dot"></span>DM failed</span>`:
+                               `<span class="badge bg-gray"><span class="badge-dot"></span>${r.status}</span>`;
+
+    const postNudge=
+      r.postNudgeComment===null?`<span style="font-size:11px;color:var(--muted)">Not checked</span>`:
+      r.postNudgeComment?       `<span class="badge bg-green"><span class="badge-dot"></span>Commented</span>`:
+                                `<span class="badge bg-red"><span class="badge-dot"></span>No update yet</span>`;
+
+    const needsResend=r.action==='sent'&&r.postNudgeComment===false;
+    const actionCell=needsResend?`<button class="btn sm danger" onclick="resend(${i})">Resend</button>`:
+      r.action==='unmapped'?`<button class="btn sm" onclick="switchTab(0)">Add to roster</button>`:'';
+
+    return`<tr class="${needsResend?'needs-update':''}">
+      <td><a class="kl" href="${S.cfg.base}/browse/${r.key}" target="_blank">${r.key}</a></td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.summary}">${r.summary}</td>
+      <td><div class="av-cell"><div class="av">${initials(r.jiraName)}</div>${r.jiraName}</div></td>
+      <td style="font-size:12px;color:${r.teamsName==='—'?'var(--danger)':'var(--text)'}">${r.teamsName}</td>
+      <td><span style="font-size:11px;color:var(--muted)">${r.comp}</span></td>
+      <td>${dueCell}</td>
+      <td>${badge}</td>
+      <td style="font-size:11px;color:var(--muted)">${r.nudgeSentAt||'—'}</td>
+      <td>${postNudge}</td>
+      <td>${actionCell}</td>
+    </tr>`;
+  }).join('');
+}
+
+function updateMetrics(){
+  document.getElementById('mTotal').textContent   = S.rows.length||'0';
+  document.getElementById('mSent').textContent    = S.rows.filter(r=>r.action==='sent').length||'0';
+  document.getElementById('mUpdated').textContent = S.rows.filter(r=>r.action==='has_comment').length||'0';
+  document.getElementById('mSkipped').textContent = S.rows.filter(r=>['unmapped','blocked','dm_failed'].includes(r.action)).length||'0';
+}
+
+// ── Check post-nudge comments ──────────────────────────────────────────────
+async function checkComments(){
+  if(!S.rows.length){toast('Fetch stories first.','err');return;}
+  const btn=document.getElementById('checkBtn');
+  btn.disabled=true; btn.textContent='Checking…';
+  const sentRows=S.rows.filter(r=>r.action==='sent');
+  for(const r of sentRows){
+    try{
+      const data=await jiraGet(`/rest/api/3/issue/${r.key}?fields=comment`);
+      const comments=data.fields?.comment?.comments||[];
+      const nudgeTime=S.lastRun||new Date();
+      r.postNudgeComment=comments.some(c=>new Date(c.created)>nudgeTime);
+    }catch(e){r.postNudgeComment=null;}
+  }
+  renderDispatch();
+  btn.disabled=false; btn.textContent='Check post-nudge comments';
+  const no=sentRows.filter(r=>r.postNudgeComment===false).length;
+  toast(no?`${no} assignee(s) haven't updated yet — Resend buttons shown.`:'All nudged stories updated!',no?'info':'ok');
+}
+
+// ── Resend ──────────────────────────────────────────────────────────────────
+async function resend(i){
+  const r=S.rows[i];
+  if(!r.teamsUPN){toast('No Teams UPN for this person — add in roster.','err');return;}
+  if(!S.cfg.graph){toast('No Graph token — add in Connect settings.','err');return;}
+  toast(`Resending to ${r.teamsName}…`,'info');
+  try{
+    await sendTeamsDM(r.teamsUPN,r);
+    r.nudgeSentAt=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    r.postNudgeComment=null;
+    renderDispatch();
+    toast(`Resent to ${r.teamsName}.`,'ok');
+  }catch(e){toast('DM failed: '+e.message,'err');}
+}
+
+// ── Analytics ────────────────────────────────────────────────────────────────
+async function loadAnalytics(){
+  if(!S.connected){toast('Connect to Jira first.','err');return;}
+  const btn=document.getElementById('analyticsBtn');
+  btn.disabled=true; btn.textContent='Loading…';
+  document.getElementById('analyticsInfo').textContent='Fetching…';
+  try{
+    const boards=await jiraGet(`/rest/agile/1.0/board?projectKeyOrId=${S.cfg.project}`);
+    const board=boards.values?.[0];
+    if(!board){toast('No agile board found.','err');btn.disabled=false;btn.textContent='Load';return;}
+    const sprintsData=await jiraGet(`/rest/agile/1.0/board/${board.id}/sprint?state=active,closed&maxResults=10`);
+    S.sprints=sprintsData.values||[];
+    const sel=document.getElementById('sprintSel');
+    sel.innerHTML=S.sprints.map(sp=>`<option value="${sp.id}">${sp.name} (${sp.state})</option>`).join('');
+    if(S.sprints.length) await loadBurndown();
+    const issueData=await jiraGet(`/rest/api/3/search?jql=${encodeURIComponent(`project=${S.cfg.project} ORDER BY updated DESC`)}&maxResults=50&fields=summary,assignee,status,created,resolutiondate,changelog&expand=changelog`);
+    S.analyticsRows=issueData.issues||[];
+    renderCycleTable(); renderWorkload();
+    document.getElementById('analyticsInfo').innerHTML=`<span>Board: ${board.name} · ${S.sprints.length} sprint(s)</span>`;
+  }catch(e){toast('Analytics error: '+e.message,'err');document.getElementById('analyticsInfo').textContent='Error.';}
+  btn.disabled=false; btn.textContent='Load';
+}
+
+async function loadBurndown(){
+  const sid=document.getElementById('sprintSel').value;
+  if(!sid||sid.includes('—'))return;
+  try{
+    const data=await jiraGet(`/rest/agile/1.0/sprint/${sid}/issue?maxResults=100&fields=summary,status`);
+    renderBurndown(data.issues||[]);
+    renderStatusPie(data.issues||[]);
+  }catch(e){toast('Sprint load error.','err');}
+}
+
+function daysDiff(a,b){if(!a||!b)return null;return Math.round((new Date(b)-new Date(a))/86400000);}
+
+function renderBurndown(issues){
+  const sprint=S.sprints.find(s=>s.id==document.getElementById('sprintSel').value);
+  if(!sprint)return;
+  const start=new Date(sprint.startDate||Date.now()-86400000*14);
+  const end=new Date(sprint.endDate||Date.now());
+  const total=issues.length;
+  const days=Math.max(1,daysDiff(start,end));
+  const labels=[],ideal=[],actual=[];
+  const done=issues.filter(i=>/done|closed|resolved/i.test(i.fields.status?.name||'')).length;
+  for(let i=0;i<=days;i++){
+    const d=new Date(start);d.setDate(d.getDate()+i);
+    labels.push(d.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}));
+    ideal.push(Math.round(total-(total/days)*i));
+    actual.push(Math.max(0,total-Math.round(done*Math.min(1,(i/days)*1.3))));
+  }
+  const ctx=document.getElementById('burndownChart');
+  if(S.charts.burndown) S.charts.burndown.destroy();
+  S.charts.burndown=new Chart(ctx,{type:'line',data:{labels,datasets:[
+    {label:'Ideal',data:ideal,borderColor:'#4f8ef7',borderDash:[6,4],pointRadius:0,tension:0},
+    {label:'Actual',data:actual,borderColor:'#38c88a',backgroundColor:'rgba(56,200,138,.08)',fill:true,tension:.3,pointRadius:3,pointBackgroundColor:'#38c88a'}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#7b8aaa',font:{size:12}}}},scales:{x:{ticks:{color:'#7b8aaa',font:{size:11},maxRotation:45},grid:{color:'#2a3248'}},y:{ticks:{color:'#7b8aaa',font:{size:11}},grid:{color:'#2a3248'},beginAtZero:true}}}});
+}
+
+function renderStatusPie(issues){
+  const counts={};
+  issues.forEach(i=>{const s=i.fields.status?.name||'Unknown';counts[s]=(counts[s]||0)+1;});
+  const ctx=document.getElementById('statusChart');
+  if(S.charts.status) S.charts.status.destroy();
+  S.charts.status=new Chart(ctx,{type:'doughnut',data:{labels:Object.keys(counts),datasets:[{data:Object.values(counts),backgroundColor:['#4f8ef7','#38c88a','#f5a623','#e05252','#a78bfa','#7b8aaa'],borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:'right',labels:{color:'#7b8aaa',font:{size:11},padding:12}}}}});
+}
+
+function renderWorkload(){
+  const counts={};
+  S.analyticsRows.forEach(i=>{const n=i.fields.assignee?.displayName||'Unassigned';counts[n]=(counts[n]||0)+1;});
+  const ctx=document.getElementById('workloadChart');
+  if(S.charts.workload) S.charts.workload.destroy();
+  S.charts.workload=new Chart(ctx,{type:'bar',data:{labels:Object.keys(counts),datasets:[{label:'Stories',data:Object.values(counts),backgroundColor:'#4f8ef780',borderColor:'#4f8ef7',borderWidth:1,borderRadius:4}]},options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#7b8aaa',font:{size:11}},grid:{color:'#2a3248'}},y:{ticks:{color:'#7b8aaa',font:{size:11}},grid:{display:false}}}}});
+}
+
+function renderCycleTable(){
+  const tbody=document.getElementById('cycleBody');
+  if(!S.analyticsRows.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty-state">No issues.</div></td></tr>';return;}
+  tbody.innerHTML=S.analyticsRows.slice(0,40).map(issue=>{
+    const f=issue.fields;
+    const cl=issue.changelog?.histories||[];
+    let inProgressAt=null,doneAt=f.resolutiondate||null;
+    for(const h of cl){for(const item of h.items){
+      if(item.field==='status'){
+        if(/in.progress/i.test(item.toValue||'')) inProgressAt=inProgressAt||h.created;
+        if(/done|closed|resolved/i.test(item.toValue||'')) doneAt=doneAt||h.created;
+      }
+    }}
+    const lead=daysDiff(f.created,doneAt);
+    const cycle=daysDiff(inProgressAt,doneAt);
+    const lc=lead!==null?`<span style="color:${lead>14?'var(--danger)':lead>7?'var(--warn)':'var(--accent2)'}">${lead}d</span>`:'—';
+    const cc=cycle!==null?`<span style="color:${cycle>7?'var(--warn)':'var(--accent)'}">${cycle}d</span>`:'—';
+    return`<tr>
+      <td><a class="kl" href="${S.cfg.base}/browse/${issue.key}" target="_blank">${issue.key}</a></td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.summary}</td>
+      <td><div class="av-cell"><div class="av">${initials(f.assignee?.displayName)}</div>${f.assignee?.displayName||'—'}</div></td>
+      <td style="font-size:12px">${fmt(f.created)}</td>
+      <td style="font-size:12px">${fmt(inProgressAt)}</td>
+      <td style="font-size:12px">${fmt(doneAt)}</td>
+      <td>${lc}</td><td>${cc}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Downloads ────────────────────────────────────────────────────────────────
+function openDl(){openOv('dlOv')}
+
+function dlBlob(content,filename,type){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([content],{type}));
+  a.download=filename;a.click();URL.revokeObjectURL(a.href);
+}
+
+function downloadCSV(){
+  if(!S.rows.length){toast('No dispatch data yet.','err');return;}
+  const h=['Key','Summary','Jira Assignee','Teams Name','Component','Due','Action','Nudge Sent','Post-nudge Comment'];
+  const body=S.rows.map(r=>[r.key,`"${r.summary.replace(/"/g,'""')}"`,r.jiraName,r.teamsName,r.comp,r.due||'',r.action,r.nudgeSentAt||'',r.postNudgeComment===null?'not checked':r.postNudgeComment?'yes':'no']);
+  dlBlob([h,...body].map(r=>r.join(',')).join('\n'),'jira-nudge-'+new Date().toISOString().slice(0,10)+'.csv','text/csv');
+  closeOv('dlOv');
+}
+
+function downloadHTML(){
+  if(!S.rows.length){toast('No dispatch data yet.','err');return;}
+  const now=new Date().toLocaleString('en-IN');
+  const rows=S.rows.map(r=>`<tr><td>${r.key}</td><td>${r.summary}</td><td>${r.jiraName}</td><td>${r.teamsName}</td><td>${r.comp}</td><td>${r.due||'—'}</td><td>${r.action}</td><td>${r.nudgeSentAt||'—'}</td></tr>`).join('');
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Jira Nudge Report</title>
+<style>body{font-family:Segoe UI,sans-serif;padding:32px;background:#0f1117;color:#e8ecf4}h1{font-size:20px;margin-bottom:4px}p{color:#7b8aaa;font-size:13px;margin-bottom:22px}table{width:100%;border-collapse:collapse;background:#1a2033;border-radius:8px;overflow:hidden}th{background:#1e2535;padding:9px 13px;text-align:left;font-size:11px;text-transform:uppercase;color:#7b8aaa}td{padding:9px 13px;border-bottom:1px solid #2a3248;font-size:13px}</style></head>
+<body><h1>Jira Nudge Report</h1><p>Generated: ${now} · Project: ${S.cfg.project}</p>
+<table><thead><tr><th>Key</th><th>Summary</th><th>Jira Assignee</th><th>Teams Name</th><th>Component</th><th>Due</th><th>Action</th><th>Sent</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+  dlBlob(html,'jira-nudge-snapshot.html','text/html');
+  closeOv('dlOv');
+}
+
+function downloadPDF(){
+  if(!S.rows.length){toast('No dispatch data yet.','err');return;}
+  const now=new Date().toLocaleString('en-IN');
+  const sent=S.rows.filter(r=>r.action==='sent').length;
+  const rows=S.rows.map(r=>`<tr><td>${r.key}</td><td>${r.summary}</td><td>${r.jiraName}</td><td>${r.teamsName}</td><td>${r.comp}</td><td>${r.due||'—'}</td><td>${r.action}</td><td>${r.nudgeSentAt||'—'}</td></tr>`).join('');
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Jira Nudge Report</title>
+<style>body{font-family:Segoe UI,sans-serif;padding:36px;color:#111}h1{font-size:21px;margin-bottom:4px}.sub{color:#666;font-size:12px;margin-bottom:24px}.metrics{display:flex;gap:14px;margin-bottom:22px}.m{border:1px solid #e0e0e0;border-radius:7px;padding:12px 18px}.m-l{font-size:10px;text-transform:uppercase;color:#888;margin-bottom:3px}.m-v{font-size:24px;font-weight:700}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#f5f5f5;padding:8px 11px;text-align:left;border-bottom:2px solid #e0e0e0;font-size:10px;text-transform:uppercase;color:#555}td{padding:8px 11px;border-bottom:1px solid #eee}@media print{body{padding:16px}}</style></head><body>
+<h1>Jira Nudge Report</h1><div class="sub">Generated: ${now} &nbsp;·&nbsp; Project: ${S.cfg.project}</div>
+<div class="metrics"><div class="m"><div class="m-l">Total</div><div class="m-v">${S.rows.length}</div></div><div class="m"><div class="m-l">Sent</div><div class="m-v" style="color:#16a34a">${sent}</div></div></div>
+<table><thead><tr><th>Key</th><th>Summary</th><th>Jira Assignee</th><th>Teams Name</th><th>Component</th><th>Due</th><th>Action</th><th>Sent</th></tr></thead><tbody>${rows}</tbody></table>
+<script>window.onload=()=>window.print()<\/script></body></html>`);
+  win.document.close();
+  closeOv('dlOv');
+  toast('PDF print dialog opened.','info');
+}
+
+// ── Toast ────────────────────────────────────────────────────────────────────
+function toast(msg,type='info'){
+  const el=document.createElement('div');
+  el.className=`toast ${type}`;el.textContent=msg;
+  document.body.appendChild(el);setTimeout(()=>el.remove(),4200);
+}
+</script>
+</body>
+</html>
