@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jira Timeline Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0e14;
+    --surface: #13151f;
+    --surface2: #1a1d2b;
+    --surface3: #222536;
+    --border: #2a2d3e;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --accent3: #43e97b;
+    --accent4: #f7971e;
+    --text: #e8eaf6;
+    --text2: #8b8fa8;
+    --text3: #555872;
+    --font-head: 'Syne', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+    --radius: 8px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── TOP BAR ─── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-head);
+    font-weight: 800;
+    font-size: 1.2rem;
+    letter-spacing: -0.5px;
+  }
+  .logo-icon {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    padding: 7px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: #5a52e0; color: #fff; border-color: #5a52e0; }
+  .btn-danger { border-color: var(--accent2); color: var(--accent2); }
+  .btn-danger:hover { background: rgba(255,101,132,0.1); }
+
+  /* ─── LAYOUT ─── */
+  .app { display: flex; height: calc(100vh - 57px); }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: 300px;
+    min-width: 300px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .sidebar-header {
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--text2);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .sidebar-body { flex: 1; overflow-y: auto; padding: 12px; }
+  .sidebar-body::-webkit-scrollbar { width: 4px; }
+  .sidebar-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ─── CONNECT PANEL ─── */
+  .connect-panel {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .connect-panel h3 {
+    font-family: var(--font-head);
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--accent);
+  }
+  .field-group { margin-bottom: 10px; }
+  .field-label {
+    font-size: 0.7rem;
+    color: var(--text2);
+    margin-bottom: 4px;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .field-input {
+    width: 100%;
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .field-input:focus { border-color: var(--accent); }
+  .field-input::placeholder { color: var(--text3); }
+
+  /* ─── FILTER SECTION ─── */
+  .filter-section {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .filter-section h3 {
+    font-family: var(--font-head);
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .tag {
+    font-size: 0.68rem;
+    padding: 3px 8px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text2);
+  }
+  .tag.active, .tag:hover { border-color: var(--accent); color: var(--accent); background: rgba(108,99,255,0.1); }
+  .tag.status-todo.active { border-color: var(--text3); color: var(--text3); background: rgba(85,88,114,0.15); }
+  .tag.status-inprogress.active { border-color: var(--accent4); color: var(--accent4); background: rgba(247,151,30,0.1); }
+  .tag.status-done.active { border-color: var(--accent3); color: var(--accent3); background: rgba(67,233,123,0.1); }
+
+  /* ─── ISSUE LIST ─── */
+  .issue-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .issue-item::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 3px 0 0 3px;
+  }
+  .issue-item.priority-high::before { background: var(--accent2); }
+  .issue-item.priority-medium::before { background: var(--accent4); }
+  .issue-item.priority-low::before { background: var(--accent3); }
+  .issue-item:hover { border-color: var(--accent); transform: translateX(2px); }
+  .issue-item.selected { border-color: var(--accent); background: rgba(108,99,255,0.08); }
+  .issue-key {
+    font-size: 0.68rem;
+    color: var(--accent);
+    margin-bottom: 3px;
+    font-weight: 500;
+  }
+  .issue-title {
+    font-size: 0.78rem;
+    color: var(--text);
+    line-height: 1.4;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .issue-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .status-badge {
+    font-size: 0.62rem;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .status-todo { background: rgba(85,88,114,0.3); color: var(--text2); }
+  .status-inprogress { background: rgba(247,151,30,0.15); color: var(--accent4); }
+  .status-done { background: rgba(67,233,123,0.1); color: var(--accent3); }
+  .status-review { background: rgba(108,99,255,0.15); color: var(--accent); }
+  .due-label {
+    font-size: 0.65rem;
+    color: var(--text3);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .due-label.overdue { color: var(--accent2); }
+  .due-label.soon { color: var(--accent4); }
+
+  /* ─── MAIN AREA ─── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* ─── TIMELINE CONTROLS ─── */
+  .timeline-controls {
+    padding: 12px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .timeline-nav { display: flex; align-items: center; gap: 8px; }
+  .nav-btn {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text2);
+    transition: all 0.15s;
+  }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .current-period {
+    font-family: var(--font-head);
+    font-size: 0.9rem;
+    font-weight: 700;
+    min-width: 160px;
+    text-align: center;
+  }
+  .view-tabs { display: flex; gap: 4px; margin-left: auto; }
+  .view-tab {
+    font-size: 0.72rem;
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    transition: all 0.15s;
+  }
+  .view-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* ─── GANTT ─── */
+  .gantt-wrapper { flex: 1; overflow: auto; position: relative; }
+  .gantt-wrapper::-webkit-scrollbar { height: 6px; width: 6px; }
+  .gantt-wrapper::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .gantt-container {
+    min-width: 900px;
+    position: relative;
+  }
+
+  /* Header row */
+  .gantt-header {
+    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .gantt-label-col {
+    width: 220px;
+    min-width: 220px;
+    padding: 10px 14px;
+    font-size: 0.7rem;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-right: 1px solid var(--border);
+    position: sticky;
+    left: 0;
+    background: var(--surface);
+    z-index: 11;
+  }
+  .gantt-dates-header {
+    flex: 1;
+    display: flex;
+  }
+  .date-col {
+    flex: 1;
+    min-width: 38px;
+    text-align: center;
+    padding: 6px 2px;
+    font-size: 0.65rem;
+    color: var(--text3);
+    border-right: 1px solid rgba(42,45,62,0.5);
+  }
+  .date-col.today { color: var(--accent); background: rgba(108,99,255,0.06); }
+  .date-col.weekend { background: rgba(0,0,0,0.15); }
+  .date-col .day-num {
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: block;
+    color: var(--text2);
+  }
+  .date-col.today .day-num { color: var(--accent); }
+
+  /* Group rows */
+  .gantt-group-header {
+    display: flex;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    left: 0;
+  }
+  .gantt-group-label {
+    width: 220px;
+    min-width: 220px;
+    padding: 7px 14px;
+    font-family: var(--font-head);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-right: 1px solid var(--border);
+    position: sticky;
+    left: 0;
+    background: var(--surface2);
+    z-index: 5;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .component-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .gantt-group-bar { flex: 1; }
+
+  /* Issue rows */
+  .gantt-row {
+    display: flex;
+    border-bottom: 1px solid rgba(42,45,62,0.5);
+    min-height: 44px;
+    transition: background 0.1s;
+  }
+  .gantt-row:hover { background: rgba(108,99,255,0.04); }
+  .gantt-row.selected { background: rgba(108,99,255,0.08); }
+  .gantt-row-label {
+    width: 220px;
+    min-width: 220px;
+    padding: 6px 14px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    position: sticky;
+    left: 0;
+    background: var(--bg);
+    z-index: 5;
+    cursor: pointer;
+  }
+  .gantt-row:hover .gantt-row-label { background: rgba(108,99,255,0.04); }
+  .gantt-row.selected .gantt-row-label { background: rgba(108,99,255,0.08); }
+  .row-key { font-size: 0.65rem; color: var(--accent); font-weight: 500; }
+  .row-title {
+    font-size: 0.75rem;
+    color: var(--text);
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 190px;
+  }
+
+  /* Gantt bar area */
+  .gantt-bar-area {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .gantt-bg-grid {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    pointer-events: none;
+  }
+  .bg-col {
+    flex: 1;
+    min-width: 38px;
+    border-right: 1px solid rgba(42,45,62,0.4);
+  }
+  .bg-col.today { background: rgba(108,99,255,0.05); }
+  .bg-col.weekend { background: rgba(0,0,0,0.08); }
+
+  .gantt-bar {
+    position: absolute;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 0.68rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    transition: filter 0.15s, transform 0.15s;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .gantt-bar:hover { filter: brightness(1.15); transform: scaleY(1.05); }
+  .gantt-bar.priority-critical { background: linear-gradient(90deg, #ff4444, #ff6584); color: #fff; }
+  .gantt-bar.priority-high { background: linear-gradient(90deg, #ff6584, #ff8fa3); color: #fff; }
+  .gantt-bar.priority-medium { background: linear-gradient(90deg, #f7971e, #ffd200); color: #1a1d2b; }
+  .gantt-bar.priority-low { background: linear-gradient(90deg, #43e97b, #38f9d7); color: #1a1d2b; }
+  .gantt-bar.priority-none { background: linear-gradient(90deg, #6c63ff, #a78bfa); color: #fff; }
+  .gantt-bar.status-done { opacity: 0.5; }
+
+  /* Today line */
+  .today-line {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: var(--accent);
+    z-index: 8;
+    pointer-events: none;
+  }
+  .today-line::before {
+    content: 'TODAY';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.6rem;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 16px;
+    color: var(--text3);
+    text-align: center;
+    padding: 40px;
+  }
+  .empty-icon { font-size: 3rem; opacity: 0.4; }
+  .empty-title { font-family: var(--font-head); font-size: 1.1rem; color: var(--text2); }
+  .empty-sub { font-size: 0.8rem; line-height: 1.6; max-width: 320px; }
+
+  /* ─── MODAL ─── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 520px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow);
+    animation: slideUp 0.2s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .modal-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .modal-key { font-size: 0.75rem; color: var(--accent); font-weight: 500; margin-bottom: 4px; }
+  .modal-title { font-family: var(--font-head); font-size: 1rem; font-weight: 700; line-height: 1.4; }
+  .modal-close {
+    background: none; border: none; color: var(--text3);
+    font-size: 20px; cursor: pointer; padding: 2px;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 20px 24px; }
+  .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+  .modal-field label {
+    font-size: 0.68rem;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    display: block;
+    margin-bottom: 5px;
+  }
+  .modal-field .value {
+    font-size: 0.82rem;
+    color: var(--text);
+  }
+  .modal-desc {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 0.8rem;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 16px;
+    min-height: 60px;
+  }
+  .modal-footer {
+    padding: 14px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  /* ─── TOAST ─── */
+  .toast-area {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 300;
+  }
+  .toast {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 0.78rem;
+    color: var(--text);
+    box-shadow: var(--shadow);
+    animation: slideIn 0.2s ease;
+    display: flex; align-items: center; gap: 8px;
+    max-width: 300px;
+  }
+  .toast.success { border-left: 3px solid var(--accent3); }
+  .toast.error { border-left: 3px solid var(--accent2); }
+  .toast.info { border-left: 3px solid var(--accent); }
+  @keyframes slideIn {
+    from { transform: translateX(20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* ─── LOADING ─── */
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  .spinner.active { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ─── STATS BAR ─── */
+  .stats-bar {
+    display: flex;
+    gap: 20px;
+    padding: 10px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.72rem;
+    color: var(--text2);
+    flex-wrap: wrap;
+  }
+  .stat { display: flex; align-items: center; gap: 6px; }
+  .stat-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .stat-num { font-family: var(--font-head); font-weight: 700; font-size: 0.9rem; color: var(--text); }
+
+  /* ─── DEMO DATA NOTICE ─── */
+  .demo-notice {
+    background: rgba(108,99,255,0.1);
+    border: 1px solid rgba(108,99,255,0.3);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.72rem;
+    color: var(--accent);
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 8px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.68rem;
+    color: var(--text2);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-bar { width: 18px; height: 8px; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">📋</div>
+    Jira Timeline
+  </div>
+  <div class="topbar-actions">
+    <div class="spinner" id="loadingSpinner"></div>
+    <button class="btn" onclick="loadDemoData()">⚡ Load Demo</button>
+    <button class="btn btn-primary" onclick="openConnectModal()">🔗 Connect to Jira</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      Issues
+      <span id="issueCount" style="color:var(--accent);font-weight:700;">0</span>
+    </div>
+    <div class="sidebar-body">
+
+      <div id="demoNotice" class="demo-notice" style="display:none;">
+        ⚡ Showing demo data. Connect your Jira instance to load real issues.
+      </div>
+
+      <!-- Filter -->
+      <div class="filter-section">
+        <h3>Filter by Status</h3>
+        <div class="tag-row" id="statusFilters">
+          <div class="tag active" onclick="toggleFilter(this,'all')" data-filter="all">All</div>
+          <div class="tag status-todo" onclick="toggleFilter(this,'To Do')" data-filter="To Do">To Do</div>
+          <div class="tag status-inprogress" onclick="toggleFilter(this,'In Progress')" data-filter="In Progress">In Progress</div>
+          <div class="tag status-review" onclick="toggleFilter(this,'In Review')" data-filter="In Review">In Review</div>
+          <div class="tag status-done" onclick="toggleFilter(this,'Done')" data-filter="Done">Done</div>
+        </div>
+        <div style="margin-top:10px;">
+          <h3 style="margin-bottom:6px;">Priority</h3>
+          <div class="tag-row" id="priorityFilters">
+            <div class="tag active" onclick="togglePriority(this,'all')" data-filter="all">All</div>
+            <div class="tag" onclick="togglePriority(this,'Critical')" data-filter="Critical" style="color:var(--accent2)">Critical</div>
+            <div class="tag" onclick="togglePriority(this,'High')" data-filter="High" style="color:var(--accent2)">High</div>
+            <div class="tag" onclick="togglePriority(this,'Medium')" data-filter="Medium" style="color:var(--accent4)">Medium</div>
+            <div class="tag" onclick="togglePriority(this,'Low')" data-filter="Low" style="color:var(--accent3)">Low</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Issue List -->
+      <div id="issueList"></div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- Timeline Controls -->
+    <div class="timeline-controls">
+      <div class="timeline-nav">
+        <div class="nav-btn" onclick="navigate(-1)">‹</div>
+        <div class="current-period" id="currentPeriod">—</div>
+        <div class="nav-btn" onclick="navigate(1)">›</div>
+      </div>
+      <button class="btn" onclick="goToToday()" style="font-size:0.72rem;padding:5px 12px;">Today</button>
+
+      <div class="view-tabs" style="margin-left:auto;">
+        <button class="view-tab active" onclick="setView('month',this)">Month</button>
+        <button class="view-tab" onclick="setView('week',this)">2 Weeks</button>
+        <button class="view-tab" onclick="setView('quarter',this)">Quarter</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat"><div class="stat-dot" style="background:var(--text3)"></div>Todo <span class="stat-num" id="statTodo">0</span></div>
+      <div class="stat"><div class="stat-dot" style="background:var(--accent4)"></div>In Progress <span class="stat-num" id="statProgress">0</span></div>
+      <div class="stat"><div class="stat-dot" style="background:var(--accent)"></div>In Review <span class="stat-num" id="statReview">0</span></div>
+      <div class="stat"><div class="stat-dot" style="background:var(--accent3)"></div>Done <span class="stat-num" id="statDone">0</span></div>
+      <div class="stat" style="margin-left:auto;"><div class="stat-dot" style="background:var(--accent2)"></div>Overdue <span class="stat-num" id="statOverdue" style="color:var(--accent2)">0</span></div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <span style="font-weight:500;color:var(--text2);margin-right:4px;">Priority:</span>
+      <div class="legend-item"><div class="legend-bar" style="background:linear-gradient(90deg,#ff4444,#ff6584)"></div> Critical</div>
+      <div class="legend-item"><div class="legend-bar" style="background:linear-gradient(90deg,#ff6584,#ff8fa3)"></div> High</div>
+      <div class="legend-item"><div class="legend-bar" style="background:linear-gradient(90deg,#f7971e,#ffd200)"></div> Medium</div>
+      <div class="legend-item"><div class="legend-bar" style="background:linear-gradient(90deg,#43e97b,#38f9d7)"></div> Low</div>
+      <div class="legend-item"><div class="legend-bar" style="background:linear-gradient(90deg,#6c63ff,#a78bfa)"></div> None</div>
+    </div>
+
+    <!-- Gantt -->
+    <div class="gantt-wrapper" id="ganttWrapper">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">🗓️</div>
+        <div class="empty-title">No issues loaded</div>
+        <div class="empty-sub">Connect your Jira instance using the button above, or load demo data to see the timeline.</div>
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <button class="btn btn-primary" onclick="openConnectModal()">🔗 Connect to Jira</button>
+          <button class="btn" onclick="loadDemoData()">⚡ Demo Data</button>
+        </div>
+      </div>
+      <div class="gantt-container" id="ganttContainer" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST AREA -->
+<div class="toast-area" id="toastArea"></div>
+
+<!-- CONNECT MODAL -->
+<div class="modal-overlay" id="connectModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-key">CONFIGURATION</div>
+        <div class="modal-title">Connect to Jira Cloud</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('connectModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <!-- Info banner -->
+      <div style="background:rgba(67,233,123,0.07);border:1px solid rgba(67,233,123,0.25);border-radius:8px;padding:12px;font-size:0.74rem;color:var(--accent3);margin-bottom:16px;line-height:1.7;">
+        🔒 <strong>CORS-safe via Cloudflare Worker proxy.</strong><br>
+        <span style="color:var(--text2);">
+          The proxy forwards requests to Jira's <code style="color:var(--accent3);background:rgba(67,233,123,0.08);padding:1px 5px;border-radius:3px;">/rest/api/3/search/jql</code> endpoint.<br>
+          Deploy the <strong>worker.js</strong> below to Cloudflare Workers (free tier), paste its URL here.<br>
+          Your credentials travel over HTTPS only and are <strong>never stored</strong> by the proxy.
+        </span>
+      </div>
+
+      <!-- Proxy URL -->
+      <div class="field-group">
+        <label class="field-label">
+          Cloudflare Worker URL
+          <span style="font-size:0.65rem;color:var(--text3);text-transform:none;letter-spacing:0"> — e.g. https://jira-proxy.yourname.workers.dev</span>
+        </label>
+        <input class="field-input" id="proxyUrl" placeholder="https://jira-proxy.yourname.workers.dev" />
+        <div id="proxyStatus" style="font-size:0.68rem;margin-top:5px;color:var(--text3);display:none;"></div>
+      </div>
+
+      <div style="height:1px;background:var(--border);margin:14px 0;"></div>
+
+      <div class="field-group">
+        <label class="field-label">Jira Base URL</label>
+        <input class="field-input" id="jiraUrl" placeholder="https://yourcompany.atlassian.net" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Email</label>
+        <input class="field-input" id="jiraEmail" placeholder="you@company.com" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">API Token <span style="font-size:0.65rem;color:var(--text3)">(from id.atlassian.com/manage-profile/security/api-tokens)</span></label>
+        <input class="field-input" id="jiraToken" type="password" placeholder="Your API Token" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Project Key(s) <span style="font-size:0.65rem;color:var(--text3)">(comma-separated — auto-builds JQL prefix)</span></label>
+        <input class="field-input" id="jiraProjects" placeholder="PROJ,APP,BE" oninput="syncJqlPrefix()" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">
+          JQL Filter
+          <span style="font-size:0.65rem;color:var(--text3);text-transform:none;letter-spacing:0"> — prefix auto-filled from project key(s) above</span>
+        </label>
+        <input class="field-input" id="jiraJql" placeholder='project in (PROJ,APP) AND statusCategory != Done ORDER BY duedate ASC' />
+        <div style="font-size:0.67rem;color:var(--text3);margin-top:5px;line-height:1.6;">
+          💡 <code style="color:var(--accent);background:rgba(108,99,255,0.08);padding:1px 4px;border-radius:3px;">project in (...)</code> is auto-prefixed from project key(s).
+          Append: <code style="color:var(--text2);">AND sprint in openSprints()</code> · <code style="color:var(--text2);">AND assignee = currentUser()</code>
+        </div>
+      </div>
+
+      <button class="btn" onclick="testProxy()" style="width:100%;justify-content:center;margin-top:4px;">
+        🔍 Test Proxy Connection
+      </button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('connectModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="connectJira()">🔗 Fetch Issues</button>
+    </div>
+  </div>
+</div>
+
+<!-- ISSUE DETAIL MODAL -->
+<div class="modal-overlay" id="issueModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-key" id="modalKey"></div>
+        <div class="modal-title" id="modalTitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('issueModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-grid">
+        <div class="modal-field"><label>Status</label><div class="value" id="modalStatus"></div></div>
+        <div class="modal-field"><label>Priority</label><div class="value" id="modalPriority"></div></div>
+        <div class="modal-field"><label>Assignee</label><div class="value" id="modalAssignee"></div></div>
+        <div class="modal-field"><label>Component</label><div class="value" id="modalComponent"></div></div>
+        <div class="modal-field"><label>Start Date</label><div class="value" id="modalStart"></div></div>
+        <div class="modal-field"><label>Due Date</label><div class="value" id="modalDue"></div></div>
+        <div class="modal-field"><label>Story Points</label><div class="value" id="modalPoints"></div></div>
+        <div class="modal-field"><label>Issue Type</label><div class="value" id="modalType"></div></div>
+      </div>
+      <div class="modal-field" style="margin-bottom:12px;"><label>Description</label></div>
+      <div class="modal-desc" id="modalDesc"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('issueModal')">Close</button>
+      <button class="btn btn-primary" id="openJiraBtn" onclick="openInJira()">↗ Open in Jira</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───
+let issues = [];
+let filteredIssues = [];
+let selectedIssue = null;
+let activeStatusFilter = 'all';
+let activePriorityFilter = 'all';
+let viewMode = 'month'; // month | week | quarter
+let viewStart = new Date();
+let jiraConfig = { url:'', email:'', projects:'', jql:'' };
+
+// ─── INIT ───
+window.onload = () => {
+  const saved = localStorage.getItem('jiraConfig');
+  if (saved) {
+    try {
+      jiraConfig = JSON.parse(saved);
+      document.getElementById('jiraUrl').value      = jiraConfig.url      || '';
+      document.getElementById('jiraEmail').value    = jiraConfig.email    || '';
+      document.getElementById('jiraProjects').value = jiraConfig.projects || '';
+      document.getElementById('jiraJql').value      = jiraConfig.jql      || '';
+    } catch {}
+  }
+  goToToday();
+};
+
+// ─── VIEW MODES ───
+function setView(mode, el) {
+  viewMode = mode;
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderGantt();
+}
+
+function getViewDays() {
+  if (viewMode === 'week') return 14;
+  if (viewMode === 'quarter') return 91;
+  return 30;
+}
+
+function navigate(dir) {
+  const days = getViewDays();
+  viewStart = new Date(viewStart.getTime() + dir * days * 86400000);
+  renderGantt();
+}
+
+function goToToday() {
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  if (viewMode === 'month') {
+    viewStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  } else {
+    viewStart = new Date(now);
+  }
+  renderGantt();
+}
+
+function updatePeriodLabel() {
+  const days = getViewDays();
+  const end = new Date(viewStart.getTime() + (days-1)*86400000);
+  const opts = { month:'short', year:'numeric' };
+  const startStr = viewStart.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+  const endStr = end.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  document.getElementById('currentPeriod').textContent = `${startStr} – ${endStr}`;
+}
+
+// ─── DEMO DATA ───
+function loadDemoData() {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const d = (offset) => {
+    const dt = new Date(today);
+    dt.setDate(dt.getDate() + offset);
+    return dt.toISOString().split('T')[0];
+  };
+
+  issues = [
+    { key:'AUTH-101', summary:'Implement OAuth2 login flow', status:'In Progress', priority:'High', component:'Auth Service', assignee:'Priya S.', startDate:d(-5), dueDate:d(5), description:'Complete the OAuth2 implementation with Google and GitHub providers.', type:'Story', points:8, url:'' },
+    { key:'AUTH-102', summary:'JWT token refresh mechanism', status:'To Do', priority:'Medium', component:'Auth Service', assignee:'Rahul M.', startDate:d(3), dueDate:d(14), description:'Implement automatic JWT refresh before expiry.', type:'Task', points:5, url:'' },
+    { key:'AUTH-103', summary:'2FA with TOTP support', status:'To Do', priority:'Critical', component:'Auth Service', assignee:'Unassigned', startDate:d(10), dueDate:d(22), description:'Add two-factor authentication using TOTP protocol.', type:'Story', points:13, url:'' },
+    { key:'API-201', summary:'GraphQL schema for user endpoints', status:'Done', priority:'High', component:'API Gateway', assignee:'Arjun P.', startDate:d(-15), dueDate:d(-3), description:'Design and implement GraphQL schema for all user-related endpoints.', type:'Story', points:8, url:'' },
+    { key:'API-202', summary:'Rate limiting middleware', status:'In Progress', priority:'High', component:'API Gateway', assignee:'Arjun P.', startDate:d(-2), dueDate:d(8), description:'Add rate limiting to all public API endpoints with configurable thresholds.', type:'Task', points:5, url:'' },
+    { key:'API-203', summary:'API versioning strategy', status:'In Review', priority:'Medium', component:'API Gateway', assignee:'Priya S.', startDate:d(1), dueDate:d(12), description:'Document and implement API versioning using URL prefixes.', type:'Task', points:3, url:'' },
+    { key:'API-204', summary:'Deprecate v1 payment endpoints', status:'To Do', priority:'Low', component:'API Gateway', assignee:'Rahul M.', startDate:d(15), dueDate:d(28), description:'Gracefully deprecate all v1 payment-related APIs.', type:'Task', points:2, url:'' },
+    { key:'UI-301', summary:'Design system dark mode tokens', status:'In Progress', priority:'Medium', component:'Frontend', assignee:'Meera K.', startDate:d(-8), dueDate:d(4), description:'Create CSS variable system for dark and light mode theming.', type:'Story', points:5, url:'' },
+    { key:'UI-302', summary:'Dashboard analytics widgets', status:'To Do', priority:'High', component:'Frontend', assignee:'Meera K.', startDate:d(6), dueDate:d(18), description:'Build reusable chart components for the analytics dashboard.', type:'Story', points:8, url:'' },
+    { key:'UI-303', summary:'Mobile responsive navigation', status:'To Do', priority:'Medium', component:'Frontend', assignee:'Unassigned', startDate:d(12), dueDate:d(25), description:'Redesign navigation for mobile viewports below 768px.', type:'Task', points:5, url:'' },
+    { key:'DB-401', summary:'PostgreSQL index optimization', status:'Done', priority:'Critical', component:'Database', assignee:'Vikram T.', startDate:d(-20), dueDate:d(-8), description:'Analyze and add missing indexes on high-traffic tables.', type:'Task', points:8, url:'' },
+    { key:'DB-402', summary:'Redis caching for session data', status:'In Progress', priority:'High', component:'Database', assignee:'Vikram T.', startDate:d(-4), dueDate:d(7), description:'Implement Redis-based session caching to reduce DB load.', type:'Story', points:5, url:'' },
+    { key:'DB-403', summary:'Database migration for v2 schema', status:'To Do', priority:'Critical', component:'Database', assignee:'Vikram T.', startDate:d(8), dueDate:d(20), description:'Write and test migration scripts for the new v2 schema changes.', type:'Task', points:13, url:'' },
+    { key:'INFRA-501', summary:'Kubernetes cluster autoscaling', status:'In Review', priority:'High', component:'Infrastructure', assignee:'Sanjay R.', startDate:d(-6), dueDate:d(3), description:'Configure HPA and VPA for production cluster.', type:'Task', points:8, url:'' },
+    { key:'INFRA-502', summary:'CI/CD pipeline for mobile apps', status:'To Do', priority:'Medium', component:'Infrastructure', assignee:'Sanjay R.', startDate:d(5), dueDate:d(19), description:'Set up GitHub Actions pipeline for iOS and Android builds.', type:'Story', points:5, url:'' },
+  ];
+
+  document.getElementById('demoNotice').style.display = 'block';
+  applyFilters();
+  renderStats();
+  goToToday();
+  showToast('Demo data loaded — 15 issues across 5 components', 'success');
+}
+
+// ─── JIRA CONNECT ───
+function openConnectModal() {
+  const saved = localStorage.getItem('jiraConfig');
+  if (saved) {
+    try {
+      const cfg = JSON.parse(saved);
+      document.getElementById('proxyUrl').value     = cfg.proxyUrl  || '';
+      document.getElementById('jiraUrl').value      = cfg.url       || '';
+      document.getElementById('jiraEmail').value    = cfg.email     || '';
+      document.getElementById('jiraProjects').value = cfg.projects  || '';
+      document.getElementById('jiraJql').value      = cfg.jql       || '';
+    } catch {}
+  }
+  document.getElementById('connectModal').classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ── Auto-sync JQL prefix when project keys are typed ──
+function syncJqlPrefix() {
+  const projects = document.getElementById('jiraProjects').value.trim();
+  const jqlEl    = document.getElementById('jiraJql');
+  if (!projects) return;
+
+  const keys   = projects.split(',').map(p => p.trim()).filter(Boolean);
+  const prefix = keys.length === 1
+    ? `project = ${keys[0]}`
+    : `project in (${keys.join(', ')})`;
+
+  const current         = jqlEl.value.trim();
+  const projectPrefixRx = /^project\s*(=\s*\w+|in\s*\([^)]*\))\s*(AND\s*)?/i;
+  if (projectPrefixRx.test(current)) {
+    jqlEl.value = current.replace(projectPrefixRx, prefix + ' AND ');
+  } else {
+    jqlEl.value = current
+      ? `${prefix} AND ${current}`
+      : `${prefix} AND statusCategory != Done ORDER BY duedate ASC`;
+  }
+}
+
+// ── Test proxy health ──
+async function testProxy() {
+  const proxy    = document.getElementById('proxyUrl').value.trim().replace(/\/$/, '');
+  const statusEl = document.getElementById('proxyStatus');
+  statusEl.style.display = 'block';
+
+  if (!proxy) {
+    statusEl.style.color = 'var(--accent4)';
+    statusEl.textContent = '⚠️ Enter a proxy URL first.';
+    return;
+  }
+  statusEl.style.color = 'var(--text3)';
+  statusEl.textContent = '⏳ Testing proxy…';
+
+  try {
+    const res  = await fetch(`${proxy}/health`, { signal: AbortSignal.timeout(6000) });
+    const json = await res.json().catch(() => ({}));
+    if (res.ok && json.status === 'ok') {
+      statusEl.style.color = 'var(--accent3)';
+      statusEl.textContent = '✅ Proxy is reachable and healthy!';
+    } else {
+      statusEl.style.color = 'var(--accent4)';
+      statusEl.textContent = `⚠️ Proxy responded HTTP ${res.status}`;
+    }
+  } catch (e) {
+    statusEl.style.color = 'var(--accent2)';
+    statusEl.textContent = `❌ Cannot reach proxy: ${e.message}`;
+  }
+}
+
+// ── Paginated fetch via proxy → /rest/api/3/search/jql (POST) ──
+async function fetchAllIssues(proxyBase, jiraBase, auth, jql) {
+  const FIELDS      = 'summary,status,priority,assignee,duedate,description,components,issuetype,customfield_10016,customfield_10015,startdate';
+  const MAX         = 100;
+  let allIssues     = [];
+  let nextPageToken = null;
+
+  do {
+    const params = new URLSearchParams({
+      jiraBase,
+      auth,
+      jql,
+      fields:     FIELDS,
+      maxResults: String(MAX),
+      ...(nextPageToken ? { nextPageToken } : {})
+    });
+
+    const res = await fetch(`${proxyBase}/jira?${params}`, {
+      signal: AbortSignal.timeout(20000)
+    });
+
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(errBody.errorMessages?.[0] || errBody.message || errBody.error || `HTTP ${res.status}`);
+    }
+
+    const data    = await res.json();
+    const page    = data.issues || [];
+    allIssues     = allIssues.concat(page);
+    nextPageToken = data.nextPageToken || null;
+
+    if (page.length < MAX) break; // last page
+
+  } while (nextPageToken);
+
+  return allIssues;
+}
+
+async function connectJira() {
+  const proxyBase = document.getElementById('proxyUrl').value.trim().replace(/\/$/, '');
+  const url       = document.getElementById('jiraUrl').value.trim().replace(/\/$/, '');
+  const email     = document.getElementById('jiraEmail').value.trim();
+  const token     = document.getElementById('jiraToken').value.trim();
+  const projects  = document.getElementById('jiraProjects').value.trim();
+  const jql       = document.getElementById('jiraJql').value.trim();
+
+  if (!url || !email || !token) {
+    showToast('Please fill in Jira URL, email and API token', 'error');
+    return;
+  }
+  if (!proxyBase) {
+    showToast('Please enter your Cloudflare Worker proxy URL', 'error');
+    document.getElementById('proxyUrl').focus();
+    return;
+  }
+
+  const finalJql = jql || (projects
+    ? `project in (${projects.split(',').map(p => p.trim()).join(', ')}) AND statusCategory != Done ORDER BY duedate ASC`
+    : 'statusCategory != Done ORDER BY duedate ASC'
+  );
+
+  // Save non-secret config only (token never persisted)
+  jiraConfig = { url, email, projects, jql: finalJql, proxyUrl: proxyBase };
+  localStorage.setItem('jiraConfig', JSON.stringify({ url, email, projects, jql: finalJql, proxyUrl: proxyBase }));
+
+  closeModal('connectModal');
+  setLoading(true);
+  showToast('Fetching issues from Jira…', 'info');
+
+  try {
+    const auth      = btoa(`${email}:${token}`);
+    const rawIssues = await fetchAllIssues(proxyBase, url, auth, finalJql);
+
+    issues = rawIssues.map(issue => ({
+      key:         issue.key,
+      summary:     issue.fields.summary,
+      status:      issue.fields.status?.name          || 'Unknown',
+      priority:    issue.fields.priority?.name        || 'None',
+      component:   issue.fields.components?.[0]?.name || 'General',
+      assignee:    issue.fields.assignee?.displayName || 'Unassigned',
+      startDate:   issue.fields.customfield_10015     || issue.fields.startdate || null,
+      dueDate:     issue.fields.duedate               || null,
+      description: extractDescription(issue.fields.description),
+      type:        issue.fields.issuetype?.name       || 'Task',
+      points:      issue.fields.customfield_10016     || null,
+      url:         `${url}/browse/${issue.key}`
+    }));
+
+    document.getElementById('demoNotice').style.display = 'none';
+    applyFilters();
+    renderStats();
+    goToToday();
+    showToast(`✅ Loaded ${issues.length} issues from Jira`, 'success');
+
+  } catch (e) {
+    showToast(`Failed: ${e.message}`, 'error');
+    console.error('[Jira Fetch Error]', e);
+  } finally {
+    setLoading(false);
+  }
+}
+
+function extractDescription(desc) {
+  if (!desc) return 'No description.';
+  if (typeof desc === 'string') return desc;
+  // Atlassian Document Format
+  try {
+    const texts = [];
+    const extract = (node) => {
+      if (node.type === 'text') texts.push(node.text);
+      if (node.content) node.content.forEach(extract);
+    };
+    extract(desc);
+    return texts.join(' ') || 'No description.';
+  } catch { return 'No description.'; }
+}
+
+// ─── FILTERS ───
+function toggleFilter(el, status) {
+  document.querySelectorAll('#statusFilters .tag').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  activeStatusFilter = status;
+  applyFilters();
+}
+
+function togglePriority(el, priority) {
+  document.querySelectorAll('#priorityFilters .tag').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  activePriorityFilter = priority;
+  applyFilters();
+}
+
+function applyFilters() {
+  filteredIssues = issues.filter(i => {
+    const statusOk = activeStatusFilter === 'all' || i.status === activeStatusFilter;
+    const priorityOk = activePriorityFilter === 'all' || i.priority === activePriorityFilter;
+    return statusOk && priorityOk;
+  });
+  renderIssueList();
+  renderGantt();
+}
+
+// ─── ISSUE LIST ───
+function renderIssueList() {
+  const container = document.getElementById('issueList');
+  document.getElementById('issueCount').textContent = filteredIssues.length;
+
+  if (!filteredIssues.length) {
+    container.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text3);font-size:0.78rem;">No issues match filters</div>`;
+    return;
+  }
+
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  container.innerHTML = filteredIssues.map(issue => {
+    const isSelected = selectedIssue?.key === issue.key;
+    const priorityClass = `priority-${issue.priority.toLowerCase().replace(/\s+/g,'')}`;
+    const statusClass = getStatusClass(issue.status);
+    
+    let dueHtml = '';
+    if (issue.dueDate) {
+      const due = new Date(issue.dueDate);
+      const diff = Math.round((due - today) / 86400000);
+      const isOverdue = diff < 0 && issue.status !== 'Done';
+      const isSoon = diff >= 0 && diff <= 3;
+      const cls = isOverdue ? 'overdue' : isSoon ? 'soon' : '';
+      const label = isOverdue ? `${Math.abs(diff)}d overdue` : diff === 0 ? 'Due today' : `Due in ${diff}d`;
+      dueHtml = `<div class="due-label ${cls}">📅 ${label}</div>`;
+    }
+
+    return `<div class="issue-item ${priorityClass} ${isSelected?'selected':''}" onclick="selectIssue('${issue.key}')">
+      <div class="issue-key">${issue.key}</div>
+      <div class="issue-title">${issue.summary}</div>
+      <div class="issue-meta">
+        <span class="status-badge ${statusClass}">${issue.status}</span>
+        ${dueHtml}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function getStatusClass(status) {
+  const s = status.toLowerCase();
+  if (s.includes('progress')) return 'status-inprogress';
+  if (s.includes('done') || s.includes('closed') || s.includes('resolved')) return 'status-done';
+  if (s.includes('review') || s.includes('testing') || s.includes('qa')) return 'status-review';
+  return 'status-todo';
+}
+
+// ─── STATS ───
+function renderStats() {
+  const counts = { todo:0, progress:0, review:0, done:0, overdue:0 };
+  const today = new Date(); today.setHours(0,0,0,0);
+  issues.forEach(i => {
+    const s = i.status.toLowerCase();
+    if (s.includes('done') || s.includes('closed')) counts.done++;
+    else if (s.includes('progress')) counts.progress++;
+    else if (s.includes('review')) counts.review++;
+    else counts.todo++;
+    if (i.dueDate && new Date(i.dueDate) < today && !s.includes('done') && !s.includes('closed')) counts.overdue++;
+  });
+  document.getElementById('statTodo').textContent = counts.todo;
+  document.getElementById('statProgress').textContent = counts.progress;
+  document.getElementById('statReview').textContent = counts.review;
+  document.getElementById('statDone').textContent = counts.done;
+  document.getElementById('statOverdue').textContent = counts.overdue;
+}
+
+// ─── GANTT ───
+function renderGantt() {
+  const container = document.getElementById('ganttContainer');
+  const empty = document.getElementById('emptyState');
+
+  if (!filteredIssues.length) {
+    container.style.display = 'none';
+    empty.style.display = issues.length ? 'flex' : 'flex';
+    if (issues.length) {
+      empty.innerHTML = `<div class="empty-icon">🔍</div><div class="empty-title">No issues match filters</div><div class="empty-sub">Try adjusting your status or priority filters.</div>`;
+    }
+    updatePeriodLabel();
+    return;
+  }
+
+  container.style.display = 'block';
+  empty.style.display = 'none';
+  updatePeriodLabel();
+
+  const days = getViewDays();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dates = [];
+  for (let i = 0; i < days; i++) {
+    const d = new Date(viewStart.getTime() + i * 86400000);
+    dates.push(d);
+  }
+
+  // Group by component
+  const groups = {};
+  filteredIssues.forEach(issue => {
+    const comp = issue.component || 'General';
+    if (!groups[comp]) groups[comp] = [];
+    groups[comp].push(issue);
+  });
+
+  const componentColors = ['#6c63ff','#ff6584','#43e97b','#f7971e','#00d2ff','#ff9a9e','#a18cd1'];
+  const compList = Object.keys(groups);
+
+  // Build header
+  const dayHeaders = dates.map(d => {
+    const isToday = d.getTime() === today.getTime();
+    const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+    const dayName = d.toLocaleDateString('en-US',{weekday:'short'}).substring(0,1);
+    const dayNum = d.getDate();
+    return `<div class="date-col ${isToday?'today':''} ${isWeekend?'weekend':''}">
+      <span class="day-num">${dayNum}</span>${dayName}
+    </div>`;
+  }).join('');
+
+  // Calculate today line position
+  const todayIdx = dates.findIndex(d => d.getTime() === today.getTime());
+  const colWidth = 100 / days;
+
+  let html = `
+    <div class="gantt-header">
+      <div class="gantt-label-col">Issue</div>
+      <div class="gantt-dates-header">${dayHeaders}</div>
+    </div>`;
+
+  compList.forEach((comp, ci) => {
+    const color = componentColors[ci % componentColors.length];
+    html += `
+      <div class="gantt-group-header">
+        <div class="gantt-group-label">
+          <div class="component-dot" style="background:${color}"></div>
+          ${comp} <span style="font-size:0.65rem;color:var(--text3);font-weight:400;margin-left:4px;">(${groups[comp].length})</span>
+        </div>
+        <div class="gantt-group-bar"></div>
+      </div>`;
+
+    groups[comp].forEach(issue => {
+      const isSelected = selectedIssue?.key === issue.key;
+      const statusCls = getStatusClass(issue.status);
+      const priorityCls = `priority-${(issue.priority||'none').toLowerCase().replace(/\s+/g,'')}`;
+
+      // Calculate bar position
+      let barHtml = '';
+      if (issue.startDate || issue.dueDate) {
+        const start = issue.startDate ? new Date(issue.startDate) : (issue.dueDate ? new Date(new Date(issue.dueDate).getTime() - 3*86400000) : null);
+        const end = issue.dueDate ? new Date(issue.dueDate) : (issue.startDate ? new Date(new Date(issue.startDate).getTime() + 3*86400000) : null);
+
+        if (start && end) {
+          const viewEnd = dates[dates.length - 1];
+          // Clamp to view
+          const clampedStart = start < viewStart ? viewStart : start;
+          const clampedEnd = end > viewEnd ? viewEnd : end;
+
+          if (clampedStart <= viewEnd && clampedEnd >= viewStart) {
+            const startOffset = Math.round((clampedStart - viewStart) / 86400000);
+            const duration = Math.max(1, Math.round((clampedEnd - clampedStart) / 86400000) + 1);
+            const left = (startOffset / days * 100).toFixed(2);
+            const width = Math.min(duration / days * 100, 100 - parseFloat(left)).toFixed(2);
+            const isDone = issue.status.toLowerCase().includes('done') || issue.status.toLowerCase().includes('closed');
+            barHtml = `<div class="gantt-bar ${priorityCls} ${isDone?'status-done':''}" 
+              style="left:${left}%;width:${width}%;"
+              onclick="openIssueDetail('${issue.key}')"
+              title="${issue.key}: ${issue.summary}">
+              ${issue.key}
+            </div>`;
+          }
+        }
+      }
+
+      // BG grid
+      const bgCols = dates.map(d => {
+        const isToday2 = d.getTime() === today.getTime();
+        const isWeekend2 = d.getDay() === 0 || d.getDay() === 6;
+        return `<div class="bg-col ${isToday2?'today':''} ${isWeekend2?'weekend':''}"></div>`;
+      }).join('');
+
+      // Today line
+      const todayLine = todayIdx >= 0 ? `<div class="today-line" style="left:${((todayIdx + 0.5)/days*100).toFixed(2)}%"></div>` : '';
+
+      html += `
+        <div class="gantt-row ${isSelected?'selected':''}" id="row-${issue.key}">
+          <div class="gantt-row-label" onclick="selectIssue('${issue.key}')">
+            <div class="row-key">${issue.key}</div>
+            <div class="row-title" title="${issue.summary}">${issue.summary}</div>
+          </div>
+          <div class="gantt-bar-area">
+            <div class="gantt-bg-grid">${bgCols}${todayLine}</div>
+            ${barHtml || `<div style="position:absolute;left:50%;transform:translateX(-50%);font-size:0.65rem;color:var(--text3);">no dates</div>`}
+          </div>
+        </div>`;
+    });
+  });
+
+  container.innerHTML = html;
+}
+
+// ─── SELECT ISSUE ───
+function selectIssue(key) {
+  selectedIssue = issues.find(i => i.key === key) || null;
+  renderIssueList();
+  renderGantt();
+  if (selectedIssue) {
+    // Scroll row into view in gantt
+    setTimeout(() => {
+      const row = document.getElementById(`row-${key}`);
+      if (row) row.scrollIntoView({ block:'nearest', behavior:'smooth' });
+    }, 50);
+  }
+}
+
+function openIssueDetail(key) {
+  const issue = issues.find(i => i.key === key);
+  if (!issue) return;
+  selectedIssue = issue;
+
+  document.getElementById('modalKey').textContent = issue.key;
+  document.getElementById('modalTitle').textContent = issue.summary;
+  document.getElementById('modalStatus').innerHTML = `<span class="status-badge ${getStatusClass(issue.status)}">${issue.status}</span>`;
+  document.getElementById('modalPriority').textContent = issue.priority || '—';
+  document.getElementById('modalAssignee').textContent = issue.assignee || 'Unassigned';
+  document.getElementById('modalComponent').textContent = issue.component || '—';
+  document.getElementById('modalStart').textContent = issue.startDate ? formatDate(issue.startDate) : '—';
+  document.getElementById('modalDue').textContent = issue.dueDate ? formatDate(issue.dueDate) : '—';
+  document.getElementById('modalPoints').textContent = issue.points || '—';
+  document.getElementById('modalType').textContent = issue.type || '—';
+  document.getElementById('modalDesc').textContent = issue.description || 'No description.';
+  
+  const openBtn = document.getElementById('openJiraBtn');
+  openBtn.style.display = issue.url ? 'flex' : 'none';
+
+  document.getElementById('issueModal').classList.add('open');
+  renderIssueList();
+}
+
+function openInJira() {
+  if (selectedIssue?.url) window.open(selectedIssue.url, '_blank');
+  else if (selectedIssue && jiraConfig.url) window.open(`${jiraConfig.url}/browse/${selectedIssue.key}`, '_blank');
+}
+
+function formatDate(dateStr) {
+  return new Date(dateStr).toLocaleDateString('en-US', { day:'numeric', month:'short', year:'numeric' });
+}
+
+// ─── HELPERS ───
+function setLoading(on) {
+  document.getElementById('loadingSpinner').classList.toggle('active', on);
+}
+
+function showToast(msg, type = 'info') {
+  const area = document.getElementById('toastArea');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  const icons = { success:'✅', error:'❌', info:'ℹ️' };
+  el.innerHTML = `<span>${icons[type]||'ℹ️'}</span>${msg}`;
+  area.appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+// ESC key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+});
+</script>
+</body>
+</html>
