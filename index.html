@@ -1532,7 +1532,7 @@ function renderGantt(){
 
   // Meta columns: Parent Summary | Target Start | Due Date | Status
   const META_COLS=[
-    {label:'Parent Summary', cls:'col-parent'},
+    //{label:'Parent Summary', cls:'col-parent'},
     {label:'Start Date', cls:''},
     {label:'Due Date', cls:''},
     {label:'Status', cls:''}
@@ -1576,7 +1576,7 @@ function renderGantt(){
     return `<div class="gantt-bar-area"><div class="gantt-bg-grid">${bgCols}${tLine}</div>${barHtml||`<div style="position:absolute;left:50%;transform:translateX(-50%);font-size:0.6rem;color:var(--text3)">no dates</div>`}</div>`;
   };
 
-  const makeMetaCells=(iss)=>{
+ // const makeMetaCells=(iss)=>{
     const scls=getStatusClass(iss.status);
     // Find parent summary: look up parentKey in filteredIssues or all issues
     let parentSummary = '—';
