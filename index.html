@@ -1,0 +1,3715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jira Roadmaps - AI &amp; Automation</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Sky blue palette */
+  --sky-50:#f0f9ff; --sky-100:#e0f2fe; --sky-200:#bae6fd; --sky-300:#7dd3fc;
+  --sky-400:#38bdf8; --sky-500:#0ea5e9; --sky-600:#0284c7; --sky-700:#0369a1;
+  --sky-800:#075985; --sky-900:#0c4a6e;
+
+  --bg: #ffffff;
+  --bg2: #f8fafc;
+  --surface: #ffffff;
+  --surface2: #f1f5f9;
+  --surface3: #e2e8f0;
+  --border: #e2e8f0;
+  --border2: #cbd5e1;
+
+  --accent: #0284c7;
+  --accent-light: rgba(2,132,199,0.12);
+  --accent-mid: rgba(2,132,199,0.25);
+
+  --text: #0c2d44;
+  --text2: #1e5272;
+  --text3: #5a88a8;
+  --text4: #8ab4cc;
+
+  --font: 'Space Grotesk', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --radius: 8px;
+  --shadow: 0 4px 20px rgba(2,100,180,0.12);
+  --shadow-sm: 0 2px 10px rgba(2,100,180,0.08);
+
+  /* Epic colors */
+  --e0:#0369a1; --e1:#7c3aed; --e2:#059669; --e3:#d97706;
+  --e4:#dc2626; --e5:#0891b2; --e6:#9333ea; --e7:#16a34a;
+
+  --sidebar-w: 300px;
+  --left-panel-w: 280px;
+  --row-h: 42px;
+  --hdr-h: 56px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background: #ffffff;
+  color:var(--text);
+  font-family:var(--font);
+  height:100vh;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+/* ── TOPBAR ── */
+.topbar{
+  height:52px;
+  background:linear-gradient(90deg,var(--sky-800),var(--sky-700));
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;flex-shrink:0;
+  box-shadow:0 2px 12px rgba(3,105,161,0.4);
+  z-index:50;
+}
+.logo{display:flex;align-items:center;gap:10px;color:#fff}
+.logo-icon{width:30px;height:30px;background:rgba(255,255,255,0.2);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:16px;border:1px solid rgba(255,255,255,0.3)}
+.logo-text{font-size:1rem;font-weight:700;letter-spacing:-0.3px}
+.logo-sub{font-size:0.65rem;opacity:0.7;font-family:var(--mono);letter-spacing:0.5px}
+
+.topbar-right{display:flex;align-items:center;gap:8px}
+.tb-btn{
+  font-family:var(--font);font-size:0.75rem;padding:6px 13px;border-radius:6px;
+  border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.12);
+  color:#fff;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:5px;
+  white-space:nowrap;
+}
+.tb-btn:hover{background:rgba(255,255,255,0.22);border-color:rgba(255,255,255,0.5)}
+.tb-btn.primary{background:rgba(255,255,255,0.25);border-color:rgba(255,255,255,0.5);font-weight:600}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;
+  border-radius:50%;animation:spin 0.7s linear infinite;display:none}
+.spinner.active{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── MAIN BODY ── */
+.main-body{display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0}
+
+/* ── LEFT SIDEBAR (JQL + filters) ── */
+.sidebar{
+  width:var(--sidebar-w);min-width:var(--sidebar-w);
+  background:linear-gradient(180deg,var(--sky-800) 0%,var(--sky-700) 100%);
+  display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:2px 0 16px rgba(3,105,161,0.25);
+  z-index:10;flex-shrink:0;
+}
+.sidebar-hdr{
+  padding:14px 16px 10px;
+  border-bottom:1px solid rgba(255,255,255,0.15);
+  color:#fff;
+}
+.sidebar-hdr-title{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;opacity:0.8}
+.sidebar-body{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.sidebar-body::-webkit-scrollbar{width:4px}
+.sidebar-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.25);border-radius:4px}
+
+/* JQL Panel */
+.jql-box{
+  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
+  border-radius:10px;padding:12px;
+}
+.jql-box-title{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;
+  color:rgba(255,255,255,0.7);margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.jql-textarea{
+  width:100%;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);
+  border-radius:6px;padding:8px 10px;font-family:var(--mono);font-size:0.68rem;
+  color:#fff;outline:none;resize:vertical;min-height:66px;line-height:1.6;
+  transition:border-color 0.15s;
+}
+.jql-textarea:focus{border-color:rgba(255,255,255,0.55);background:rgba(255,255,255,0.18)}
+.jql-textarea::placeholder{color:rgba(255,255,255,0.35)}
+.jql-apply-btn{
+  width:100%;margin-top:8px;padding:8px;border-radius:6px;
+  background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.35);
+  color:#fff;font-family:var(--font);font-size:0.74rem;font-weight:600;
+  cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.jql-apply-btn:hover{background:rgba(255,255,255,0.32);border-color:rgba(255,255,255,0.55)}
+
+/* Filter sections */
+.filter-box{
+  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
+  border-radius:10px;padding:10px 12px;
+}
+.filter-title{font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;
+  color:rgba(255,255,255,0.6);margin-bottom:7px}
+.tag-row{display:flex;flex-wrap:wrap;gap:4px}
+.tag{
+  font-size:0.62rem;padding:3px 9px;border-radius:20px;
+  border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);
+  color:rgba(255,255,255,0.65);cursor:pointer;transition:all 0.15s;
+  font-family:var(--font);
+}
+.tag.active,.tag:hover{background:rgba(255,255,255,0.22);border-color:rgba(255,255,255,0.5);color:#fff}
+
+/* Issue list in sidebar */
+.issue-list-section{flex:1}
+.issue-list-title{font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;
+  color:rgba(255,255,255,0.5);margin-bottom:7px;display:flex;justify-content:space-between}
+.issue-count-badge{background:rgba(255,255,255,0.2);padding:1px 7px;border-radius:10px;color:rgba(255,255,255,0.9)}
+.il-item{
+  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);
+  border-radius:7px;padding:7px 10px;margin-bottom:4px;cursor:pointer;
+  transition:all 0.15s;position:relative;overflow:hidden;
+}
+.il-item:hover{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3)}
+.il-item.selected{background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.45)}
+.il-key{font-size:0.61rem;color:var(--sky-300);font-family:var(--mono);margin-bottom:2px}
+.il-summary{font-size:0.71rem;color:rgba(255,255,255,0.9);line-height:1.3;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:4px}
+.il-meta{display:flex;align-items:center;gap:5px;justify-content:space-between}
+.sbadge{font-size:0.56rem;padding:2px 6px;border-radius:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px}
+.s-todo{background:rgba(148,163,184,0.25);color:#94a3b8}
+.s-inprog{background:rgba(251,191,36,0.2);color:#fbbf24}
+.s-review{background:rgba(56,189,248,0.2);color:#38bdf8}
+.s-done{background:rgba(52,211,153,0.2);color:#34d399}
+.s-closed{background:rgba(52,211,153,0.15);color:#34d399}
+.s-blocked{background:rgba(248,113,113,0.2);color:#f87171}
+.s-hold{background:rgba(167,139,250,0.2);color:#a78bfa}
+.s-cancel{background:rgba(148,163,184,0.15);color:#64748b}
+.due-pill{font-size:0.58rem;color:rgba(255,255,255,0.5)}
+.due-pill.overdue{color:#f87171}
+.due-pill.soon{color:#fbbf24}
+
+/* ── GANTT MAIN AREA ── */
+.gantt-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* Controls bar */
+.ctrl-bar{
+  height:46px;background:#ffffff;border-bottom:1px solid #e2e8f0;
+  display:flex;align-items:center;gap:8px;padding:0 14px;flex-shrink:0;flex-wrap:nowrap;overflow-x:auto;
+}
+.ctrl-bar::-webkit-scrollbar{height:0}
+.ctrl-sep{width:1px;height:22px;background:var(--border);flex-shrink:0;margin:0 2px}
+.ctrl-btn{
+  font-family:var(--font);font-size:0.71rem;padding:5px 11px;border-radius:6px;
+  border:1px solid #cbd5e1;background:#f8fafc;color:#475569;
+  cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:4px;
+  white-space:nowrap;flex-shrink:0;
+}
+.ctrl-btn:hover{border-color:var(--accent);color:var(--accent);background:#eff6ff}
+.ctrl-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.ctrl-btn.warn{border-color:rgba(220,38,38,0.4);color:#dc2626;background:#fff5f5}
+.ctrl-btn.warn:hover{background:rgba(220,38,38,0.08)}
+.period-label{
+  font-size:0.78rem;font-weight:600;color:#1e293b;min-width:160px;text-align:center;
+  cursor:pointer;padding:4px 8px;border-radius:6px;transition:background 0.15s;flex-shrink:0;
+}
+.period-label:hover{background:var(--accent-light)}
+.nav-btn{
+  width:26px;height:26px;border-radius:6px;border:1px solid var(--border);
+  background:var(--surface2);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:14px;color:var(--text3);transition:all 0.15s;flex-shrink:0;
+}
+.nav-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+
+/* Stats bar */
+.stats-bar{
+  height:32px;background:#f8fafc;border-bottom:1px solid #e2e8f0;
+  display:flex;align-items:center;gap:14px;padding:0 14px;flex-shrink:0;overflow-x:auto;
+}
+.stats-bar::-webkit-scrollbar{height:0}
+.sstat{display:flex;align-items:center;gap:4px;font-size:0.65rem;color:var(--text3);white-space:nowrap}
+.sstat-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sstat-num{font-weight:700;color:var(--text);font-family:var(--mono);font-size:0.7rem}
+
+/* Legend bar */
+.legend-bar{
+  min-height:28px;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;padding:0 14px;flex-shrink:0;
+  overflow-x:auto;flex-wrap:nowrap;
+}
+.legend-bar::-webkit-scrollbar{height:0}
+.legend-item{display:flex;align-items:center;gap:4px;white-space:nowrap;font-size:0.61rem;color:var(--text2)}
+.legend-swatch{width:18px;height:7px;border-radius:3px;flex-shrink:0}
+
+/* ── GANTT CONTENT LAYOUT ── */
+.gantt-content{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;position:relative}
+.gantt-scroll{flex:1;overflow:auto;min-height:0;position:relative}
+.gantt-scroll::-webkit-scrollbar{width:8px;height:8px}
+.gantt-scroll::-webkit-scrollbar-track{background:var(--surface2)}
+.gantt-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.gantt-scroll::-webkit-scrollbar-corner{background:var(--surface2)}
+
+.gantt-inner{display:flex;flex-direction:column;min-width:max-content}
+
+/* ── GANTT HEADER ROW ── */
+.gantt-header-row{
+  display:flex;position:sticky;top:0;z-index:20;
+  background:#ffffff;border-bottom:2px solid #cbd5e1;
+  min-width:max-content;
+}
+/* Left info columns */
+.g-left{display:flex;flex-shrink:0;border-right:2px solid #cbd5e1;position:sticky;left:0;z-index:22;background:#ffffff}
+.gc-issue{width:var(--left-panel-w);min-width:var(--left-panel-w);padding:0 12px;display:flex;align-items:center;
+  font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#64748b;
+  border-right:1px solid #e2e8f0;background:#ffffff;
+  cursor:pointer;user-select:none;gap:4px;transition:background 0.15s;}
+.gc-issue:hover{background:#f8fafc;color:var(--accent)}
+.gc-epic{width:110px;min-width:110px;padding:0 8px;display:flex;align-items:center;
+  font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#64748b;
+  border-right:1px solid #e2e8f0;cursor:pointer;user-select:none;gap:4px;transition:background 0.15s;}
+.gc-epic:hover{background:#f8fafc;color:var(--accent)}
+.gc-start{width:82px;min-width:82px;padding:0 6px;display:flex;align-items:center;justify-content:center;
+  font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#64748b;
+  border-right:1px solid #e2e8f0;cursor:pointer;user-select:none;gap:4px;transition:background 0.15s;}
+.gc-start:hover{background:#f8fafc;color:var(--accent)}
+.gc-due{width:82px;min-width:82px;padding:0 6px;display:flex;align-items:center;justify-content:center;
+  font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#64748b;
+  border-right:1px solid #e2e8f0;cursor:pointer;user-select:none;gap:4px;transition:background 0.15s;}
+.gc-due:hover{background:#f8fafc;color:var(--accent)}
+.gc-target{width:82px;min-width:82px;padding:0 6px;display:flex;align-items:center;justify-content:center;
+  font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#64748b;
+  border-right:1px solid #e2e8f0;cursor:pointer;user-select:none;gap:4px;transition:background 0.15s;
+  background:#f0f9ff;}
+.gc-target:hover{background:#e0f2fe;color:#0369a1}
+.gc-target-cell{width:82px;min-width:82px;background:#f0f9ff;}
+.gc-status{width:96px;min-width:96px;padding:0 6px;display:flex;align-items:center;justify-content:center;
+  font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#64748b;
+  border-right:1px solid #e2e8f0;cursor:pointer;user-select:none;gap:4px;transition:background 0.15s;}
+.gc-status:hover{background:#f8fafc;color:var(--accent)}
+.gc-assignee{width:92px;min-width:92px;padding:0 6px;display:flex;align-items:center;
+  font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#64748b;
+  cursor:pointer;user-select:none;gap:4px;transition:background 0.15s;border-right:1px solid #e2e8f0;}
+.gc-assignee:hover{background:#f8fafc;color:var(--accent)}
+.gc-reqby{width:90px;min-width:90px;padding:0 6px;display:flex;align-items:center;justify-content:center;
+  font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#64748b;
+  cursor:pointer;user-select:none;gap:4px;transition:background 0.15s;background:#faf5ff;}
+.gc-reqby:hover{background:#f3e8ff;color:#7c3aed}
+.gc-reqby-cell{width:90px;min-width:90px;background:#faf5ff;font-size:0.68rem;font-weight:600;}
+.sort-icon{font-size:0.55rem;opacity:0.5;flex-shrink:0}
+.sort-active{color:var(--accent)!important}
+.sort-active .sort-icon{opacity:1}
+
+/* Day-level header: top = month band, bottom = day numbers */
+.g-months{display:flex;flex:1;min-width:0;height:var(--hdr-h);position:relative;flex-direction:column}
+.g-month-band{position:absolute;top:0;height:50%;border-right:1px solid #94a3b8;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.68rem;font-weight:700;color:#334155;
+  background:#f8fafc;z-index:1;overflow:hidden;padding:0 4px;white-space:nowrap;}
+.g-month-band.current-month{background:#eff6ff;color:var(--accent)}
+.g-day-cell{position:absolute;bottom:0;height:50%;border-right:1px solid #e2e8f0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.58rem;font-weight:500;color:#94a3b8;
+  background:#ffffff;overflow:hidden;transition:background 0.1s;}
+.g-day-cell.weekend{background:#fafafa;color:#cbd5e1}
+.g-day-cell.today-day{background:#eff6ff;color:var(--accent);font-weight:700}
+
+/* ── GANTT ROWS ── */
+.g-row{
+  display:flex;min-height:var(--row-h);min-width:max-content;
+  border-bottom:1px solid #f1f5f9;transition:background 0.1s;
+}
+.g-row:hover{background:#f8fafc}
+.g-row.selected{background:#eff6ff}
+
+/* Epic row */
+.g-row.epic-row{
+  background:linear-gradient(90deg,#f0f9ff,#fafafa);
+  border-bottom:1px solid #e2e8f0;cursor:pointer;min-height:38px;
+}
+.g-row.epic-row:hover{background:linear-gradient(90deg,#e0f2fe,#f0f9ff)}
+
+/* Story row */
+.g-row.story-row{background:#ffffff}
+.g-row.story-row.hidden{display:none!important}
+
+/* Left cells */
+.g-left-cells{display:flex;flex-shrink:0;border-right:2px solid #cbd5e1;position:sticky;left:0;z-index:8;background:#ffffff}
+
+.gc-issue-cell{
+  width:var(--left-panel-w);min-width:var(--left-panel-w);
+  padding:4px 10px;display:flex;align-items:center;gap:6px;
+  border-right:1px solid #e2e8f0;
+  background:#ffffff;z-index:5;cursor:pointer;
+  transition:background 0.1s;
+}
+.epic-row .gc-issue-cell{background:linear-gradient(90deg,#f0f9ff,#fafafa)}
+.epic-row:hover .gc-issue-cell{background:linear-gradient(90deg,#e0f2fe,#f0f9ff)}
+.epic-row .g-left-cells{background:linear-gradient(90deg,#f0f9ff,#fafafa)}
+.epic-row:hover .g-left-cells{background:linear-gradient(90deg,#e0f2fe,#f0f9ff)}
+.story-row .gc-issue-cell:hover{background:#f0f9ff}
+
+.epic-toggle{font-size:10px;color:var(--text3);transition:transform 0.2s;flex-shrink:0;width:12px;
+  display:flex;align-items:center;justify-content:center}
+.epic-toggle.open{transform:rotate(90deg)}
+.cell-key{font-size:0.6rem;color:var(--accent);font-family:var(--mono);font-weight:600;white-space:nowrap}
+.cell-key.epic-key{color:var(--sky-600)}
+.cell-summary{font-size:0.68rem;color:var(--text);line-height:1.3;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;max-width:160px}
+.cell-key-wrap{display:flex;flex-direction:column;gap:1px;overflow:hidden;flex:1}
+.cell-epic-badge{font-size:0.55rem;padding:1px 5px;border-radius:3px;background:var(--accent-light);
+  color:var(--accent);font-weight:600;width:fit-content}
+.story-indent{padding-left:26px!important}
+
+.gc-data-cell{
+  padding:4px 6px;display:flex;align-items:center;justify-content:center;
+  border-right:1px solid #e2e8f0;font-size:0.63rem;color:#475569;
+  font-family:var(--mono);text-align:center;
+}
+.gc-epic-cell{width:110px;min-width:110px;font-size:0.58rem;color:var(--sky-600);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;justify-content:flex-start;padding-left:8px}
+.gc-start-cell{width:82px;min-width:82px}
+.gc-due-cell{width:82px;min-width:82px}
+.gc-target-end-cell{width:82px;min-width:82px;background:#f8fafc;}
+.gc-status-cell{width:96px;min-width:96px}
+.gc-assignee-cell{width:92px;min-width:92px;color:var(--text2);font-size:0.6rem;font-family:var(--font);justify-content:flex-start;padding-left:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── BAR AREA ── */
+.g-bar-area{flex:1;position:relative;min-height:var(--row-h);overflow:visible}
+.g-bg-grid{position:absolute;inset:0;display:flex;pointer-events:none;z-index:0}
+.g-bg-month{height:100%;border-right:1px solid #f1f5f9;background:transparent;flex-shrink:0}
+.g-bg-month.alt{background:rgba(248,250,252,0.8)}
+.g-bg-month.current{background:rgba(239,246,255,0.7)}
+.today-line{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);z-index:3;pointer-events:none;
+  box-shadow:0 0 6px rgba(2,132,199,0.5)}
+.today-label{position:absolute;top:-1px;background:var(--accent);color:#fff;font-size:0.5rem;
+  padding:1px 4px;border-radius:2px;font-weight:700;white-space:nowrap;transform:translateX(-50%)}
+
+/* ── GANTT BAR ── */
+.g-bar{
+  position:absolute;height:24px;top:50%;transform:translateY(-50%);
+  border-radius:5px;cursor:pointer;z-index:4;pointer-events:auto;
+  display:flex;align-items:center;padding:0 8px;
+  font-size:0.62rem;font-weight:600;color:#fff;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;
+  box-shadow:0 2px 8px rgba(0,0,0,0.15);
+  transition:filter 0.15s,transform 0.15s,box-shadow 0.15s;
+}
+.g-bar:hover{filter:brightness(1.1);transform:translateY(-50%) scaleY(1.06);box-shadow:0 4px 14px rgba(0,0,0,0.25)}
+.epic-row .g-bar{height:16px;border-radius:3px}
+
+/* Due-date urgency: bar is a gradient from color to darker near end */
+/* Colors assigned per epic — base color set in JS inline style */
+.g-bar.bar-done{opacity:0.45}
+.g-bar.bar-overdue::after{
+  content:'!';position:absolute;right:5px;top:50%;transform:translateY(-50%);
+  font-size:0.65rem;font-weight:800;color:rgba(255,255,255,0.9);
+}
+
+/* ── EMPTY STATE ── */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;gap:14px;color:var(--text3);text-align:center;padding:60px 40px;
+}
+.empty-icon{font-size:3rem;opacity:0.4}
+.empty-title{font-size:1rem;font-weight:700;color:var(--text2)}
+.empty-sub{font-size:0.78rem;line-height:1.7;max-width:320px;color:var(--text3)}
+.empty-actions{display:flex;gap:10px;margin-top:8px}
+
+/* ── MODALS ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(7,89,133,0.5);backdrop-filter:blur(4px);
+  z-index:200;display:none;align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  width:520px;max-width:96vw;max-height:92vh;overflow-y:auto;
+  box-shadow:0 20px 60px rgba(3,105,161,0.3);
+  animation:slideUp 0.2s ease;
+}
+@keyframes slideUp{from{transform:translateY(18px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-hdr{padding:18px 20px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  background:linear-gradient(135deg,rgba(2,132,199,0.06),transparent)}
+.modal-tag{font-size:0.63rem;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.modal-title{font-size:0.95rem;font-weight:700;color:var(--text);line-height:1.4}
+.modal-close{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;
+  padding:2px;transition:color 0.15s;line-height:1}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:18px 20px}
+.modal-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+.field-group{margin-bottom:12px}
+.field-label{font-size:0.65rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;
+  font-weight:600;display:block;margin-bottom:5px}
+.field-input{
+  width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;
+  padding:8px 11px;font-family:var(--font);font-size:0.76rem;color:var(--text);outline:none;
+  transition:border-color 0.15s;
+}
+.field-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
+.field-input::placeholder{color:var(--text4)}
+.btn{
+  font-family:var(--font);font-size:0.74rem;padding:7px 14px;border-radius:7px;
+  border:1px solid var(--border);background:var(--surface2);color:var(--text);
+  cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:5px;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.primary:hover{background:var(--sky-600);border-color:var(--sky-600)}
+.btn.full{width:100%;justify-content:center;margin-top:7px}
+.info-box{
+  background:rgba(2,132,199,0.08);border:1px solid rgba(2,132,199,0.25);
+  border-radius:8px;padding:10px 13px;font-size:0.71rem;color:var(--text2);
+  line-height:1.6;margin-bottom:14px;
+}
+.info-box code{background:rgba(2,132,199,0.12);color:var(--accent);padding:1px 5px;border-radius:3px;font-family:var(--mono)}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.modal-field label{font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:3px}
+.modal-field .val{font-size:0.78rem;color:var(--text)}
+
+/* ── TOAST ── */
+.toast-area{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:6px;z-index:300}
+.toast{
+  background:var(--surface);border:1px solid var(--border);border-radius:9px;
+  padding:9px 14px;font-size:0.74rem;color:var(--text);
+  box-shadow:var(--shadow);animation:toastIn 0.2s ease;
+  display:flex;align-items:center;gap:8px;max-width:300px;
+}
+.toast.success{border-left:3px solid #10b981}
+.toast.error{border-left:3px solid #ef4444}
+.toast.info{border-left:3px solid var(--accent)}
+@keyframes toastIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* ── DATE PICKER DROPDOWN ── */
+.dp-wrap{position:relative}
+.dp-dropdown{
+  position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  box-shadow:var(--shadow);z-index:500;padding:14px;width:260px;display:none;
+}
+.dp-dropdown.open{display:block}
+.dp-nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.dp-nav-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:2px 7px;
+  border-radius:5px;transition:color 0.15s}
+.dp-nav-btn:hover{color:var(--accent)}
+.dp-month-label{font-size:0.82rem;font-weight:700;color:var(--text)}
+.dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px}
+.dp-dayname{font-size:0.57rem;color:var(--text4);text-align:center;padding:3px 0;text-transform:uppercase}
+.dp-day{font-size:0.7rem;text-align:center;padding:5px 2px;border-radius:5px;cursor:pointer;
+  color:var(--text2);transition:all 0.15s}
+.dp-day:hover{background:var(--accent-light);color:var(--accent)}
+.dp-day.today{color:var(--accent);font-weight:700}
+.dp-day.selected{background:var(--accent);color:#fff!important}
+.dp-day.other-month{opacity:0.3;pointer-events:none}
+.dp-day.empty{pointer-events:none}
+
+/* ── CONNECT MODE INDICATOR ── */
+.connect-mode-banner{
+  position:fixed;bottom:70px;right:20px;z-index:100;
+  background:rgba(217,119,6,0.95);color:#fff;
+  border-radius:10px;padding:10px 16px;font-size:0.76rem;font-weight:600;
+  box-shadow:0 4px 16px rgba(217,119,6,0.4);display:none;
+  animation:toastIn 0.2s ease;
+}
+.connect-mode-banner.visible{display:block}
+
+/* ── SCROLLBAR SYNC ── */
+.hscroll-bar{height:18px;background:var(--surface2);border-top:1px solid var(--border);
+  display:none;align-items:center;padding:0 4px;flex-shrink:0}
+.hscroll-bar.visible{display:flex}
+.hscroll-bar input{flex:1;accent-color:var(--accent);cursor:pointer;height:4px}
+
+/* ── TABS ── */
+.tab-bar{
+  display:flex;align-items:flex-end;gap:0;padding:0 16px;
+  background:linear-gradient(90deg,var(--sky-900),var(--sky-800));
+  border-bottom:2px solid var(--sky-600);
+  flex-shrink:0;z-index:40;
+}
+.tab-btn{
+  font-family:var(--font);font-size:0.73rem;font-weight:600;
+  padding:10px 18px 9px;border:none;cursor:pointer;
+  border-radius:8px 8px 0 0;margin-right:3px;
+  transition:all 0.18s;display:flex;align-items:center;gap:6px;
+  color:rgba(255,255,255,0.55);background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);border-bottom:none;
+  white-space:nowrap;
+}
+.tab-btn:hover{color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.12)}
+.tab-btn.active{
+  background:#ffffff;color:var(--sky-800);
+  border-color:var(--sky-400);border-bottom:2px solid #fff;
+  margin-bottom:-2px;z-index:1;
+}
+.tab-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.tab-panel{display:none;flex:1;overflow:hidden;min-height:0}
+.tab-panel.active{display:flex;flex:1;overflow:hidden;min-height:0}
+
+/* ── ZOOM CONTROLS ── */
+.zoom-group{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.zoom-btn{
+  width:24px;height:24px;border-radius:5px;border:1px solid var(--border);
+  background:var(--surface2);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:13px;color:var(--text3);transition:all 0.15s;flex-shrink:0;
+  font-weight:700;line-height:1;
+}
+.zoom-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+.zoom-label{font-size:0.64rem;color:var(--accent);font-family:var(--mono);min-width:34px;text-align:center;font-weight:600}
+
+/* ── TEAMS NUDGE & AI MODAL ── */
+.modal-wide{width:620px;max-width:96vw}
+.nudge-section{margin-bottom:16px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.nudge-section-title{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.overdue-list{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto}
+.overdue-item{display:grid;grid-template-columns:80px 1fr auto auto auto auto;align-items:center;gap:6px;padding:7px 10px;background:#fff5f5;border:1px solid rgba(239,68,68,0.2);border-radius:7px;font-size:0.72rem;}
+.overdue-item-key{color:var(--accent);font-family:var(--mono);font-weight:600;min-width:80px}
+.overdue-item-who{color:var(--text3);font-size:0.66rem}
+.overdue-days{color:#ef4444;font-weight:700;font-size:0.66rem;white-space:nowrap}
+.overdue-nudge-btn{
+  margin-left:8px;
+  font-family:var(--font);font-size:0.62rem;padding:3px 10px;border-radius:5px;
+  border:1px solid #5059C9;background:#5059C9;color:#fff;cursor:pointer;
+  transition:all 0.15s;white-space:nowrap;flex-shrink:0;display:inline-flex;align-items:center;gap:3px;
+  line-height:1.4;
+}
+.overdue-nudge-btn:hover:not(:disabled){background:#464eb8;border-color:#464eb8}
+.overdue-nudge-btn:disabled{opacity:0.55;cursor:not-allowed;}
+.ai-preview-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:0.73rem;color:var(--text);line-height:1.65;white-space:pre-wrap;max-height:280px;overflow-y:auto;font-family:var(--font)}
+.ai-loading{display:flex;align-items:center;gap:8px;color:var(--text3);font-size:0.72rem;padding:20px;justify-content:center}
+.btn.teams{background:#5059C9;border-color:#5059C9;color:#fff}
+.btn.teams:hover{background:#464eb8;border-color:#464eb8;color:#fff}
+.btn.ai-green{background:#059669;border-color:#059669;color:#fff}
+.btn.ai-green:hover{background:#047857}
+.nudge-sent{color:#059669;font-size:0.72rem;font-weight:600;display:flex;align-items:center;gap:4px}
+
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
+  border-radius:10px;padding:0;overflow:hidden;
+}
+.epic-tree-header{
+  padding:9px 12px;display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;user-select:none;transition:background 0.15s;
+}
+.epic-tree-header:hover{background:rgba(255,255,255,0.08)}
+.epic-tree-title{font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;
+  color:rgba(255,255,255,0.7);display:flex;align-items:center;gap:5px}
+.epic-tree-toggle{font-size:9px;color:rgba(255,255,255,0.5);transition:transform 0.2s;flex-shrink:0}
+.epic-tree-toggle.open{transform:rotate(90deg)}
+.epic-tree-body{padding:6px 8px 8px;display:none}
+.epic-tree-body.open{display:block}
+.et-epic-item{margin-bottom:4px}
+.et-epic-row{
+  display:flex;align-items:center;gap:5px;padding:5px 7px;border-radius:6px;
+  cursor:pointer;transition:background 0.15s;
+  background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);
+}
+.et-epic-row:hover{background:rgba(255,255,255,0.14)}
+.et-epic-toggle{font-size:8px;color:rgba(255,255,255,0.45);transition:transform 0.2s;flex-shrink:0;width:10px}
+.et-epic-toggle.open{transform:rotate(90deg)}
+.et-epic-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.et-epic-key{font-size:0.58rem;color:var(--sky-300);font-family:var(--mono);flex-shrink:0}
+.et-epic-summary{font-size:0.67rem;color:rgba(255,255,255,0.85);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3}
+.et-epic-full{
+  font-size:0.66rem;color:rgba(255,255,255,0.7);line-height:1.5;
+  padding:5px 8px 5px 24px;display:none;background:rgba(255,255,255,0.04);
+  border-radius:0 0 5px 5px;border-left:2px solid rgba(255,255,255,0.15);
+  margin-left:8px;
+}
+.et-epic-full.open{display:block}
+.et-children{padding-left:14px;margin-top:3px;display:none}
+.et-children.open{display:block}
+.et-story-item{
+  display:flex;align-items:center;gap:5px;padding:3px 7px;border-radius:5px;
+  cursor:pointer;transition:background 0.15s;margin-bottom:2px;
+}
+.et-story-item:hover{background:rgba(255,255,255,0.1)}
+.et-story-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,0.35)}
+.et-story-key{font-size:0.57rem;color:var(--sky-300);font-family:var(--mono);flex-shrink:0}
+.et-story-sum{font-size:0.63rem;color:rgba(255,255,255,0.65);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.et-badge{font-size:0.52rem;padding:1px 5px;border-radius:8px;font-weight:600;flex-shrink:0}
+
+/* ── JIRA COMMENTS TAB ── */
+.jc-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;background:#f8fafc}
+.jc-toolbar{
+  height:52px;background:#fff;border-bottom:1px solid #e2e8f0;
+  display:flex;align-items:center;gap:10px;padding:0 18px;flex-shrink:0;flex-wrap:nowrap;overflow-x:auto;
+}
+.jc-toolbar::-webkit-scrollbar{height:0}
+.jc-jql-wrap{display:flex;align-items:center;gap:8px;flex:1;min-width:300px}
+.jc-jql-input{
+  flex:1;font-family:var(--mono);font-size:0.71rem;padding:7px 11px;
+  border:1px solid #cbd5e1;border-radius:6px;background:#f8fafc;color:var(--text);
+  outline:none;transition:border-color 0.15s;
+}
+.jc-jql-input:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(2,132,199,0.1)}
+.jc-fetch-btn{
+  font-family:var(--font);font-size:0.73rem;padding:7px 15px;border-radius:6px;
+  background:var(--accent);border:none;color:#fff;cursor:pointer;transition:all 0.15s;
+  display:flex;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0;font-weight:600;
+}
+.jc-fetch-btn:hover{background:var(--sky-700)}
+.jc-fetch-btn:disabled{opacity:0.55;cursor:not-allowed}
+.jc-stats-bar{
+  height:34px;background:#fff;border-bottom:1px solid #e2e8f0;
+  display:flex;align-items:center;gap:14px;padding:0 18px;flex-shrink:0;overflow-x:auto;
+  font-size:0.65rem;color:var(--text3);
+}
+.jc-stats-bar::-webkit-scrollbar{height:0}
+.jc-stat{display:flex;align-items:center;gap:4px;white-space:nowrap}
+.jc-stat-num{font-weight:700;color:var(--text);font-family:var(--mono)}
+
+/* Table container */
+.jc-table-wrap{flex:1;overflow:auto;min-height:0;padding:0}
+.jc-table-wrap::-webkit-scrollbar{width:8px;height:8px}
+.jc-table-wrap::-webkit-scrollbar-track{background:#f1f5f9}
+.jc-table-wrap::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
+.jc-table-wrap::-webkit-scrollbar-corner{background:#f1f5f9}
+
+.jc-table{width:100%;border-collapse:collapse;font-size:0.74rem;color:var(--text);background:#fff}
+.jc-table th{
+  position:sticky;top:0;z-index:10;background:#fff;
+  padding:9px 12px;font-size:0.61rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;
+  color:#64748b;border-bottom:2px solid #e2e8f0;white-space:nowrap;
+  cursor:pointer;user-select:none;transition:background 0.12s;
+}
+.jc-table th:hover{background:#f0f9ff;color:var(--accent)}
+.jc-table th .sort-arr{font-size:0.55rem;margin-left:3px;opacity:0.4}
+.jc-table th.sorted{color:var(--accent)}
+.jc-table th.sorted .sort-arr{opacity:1}
+.jc-table td{
+  padding:9px 12px;border-bottom:1px solid #f1f5f9;vertical-align:top;
+  transition:background 0.1s;
+}
+.jc-table tr:hover td{background:#f8fafc}
+.jc-table tr.epic-tr td{background:#f0f9ff}
+.jc-table tr.epic-tr:hover td{background:#e0f2fe}
+.jc-table tr.story-tr td{background:#fff}
+.jc-table tr.story-tr td:first-child{padding-left:28px}
+
+/* Issue type column */
+.jc-type-cell{display:flex;align-items:center;gap:6px}
+.jc-type-badge{
+  font-size:0.6rem;padding:2px 7px;border-radius:12px;font-weight:700;
+  letter-spacing:0.2px;white-space:nowrap;flex-shrink:0;
+}
+.jc-type-epic{background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe}
+.jc-type-story{background:#f3e8ff;color:#6d28d9;border:1px solid #e9d5ff}
+.jc-type-task{background:#dcfce7;color:#166534;border:1px solid #bbf7d0}
+.jc-type-bug{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+.jc-type-other{background:#f1f5f9;color:#475569;border:1px solid #e2e8f0}
+
+.jc-key-link{color:var(--accent);font-family:var(--mono);font-size:0.68rem;font-weight:600;text-decoration:none;cursor:pointer}
+.jc-key-link:hover{text-decoration:underline}
+.jc-summary{font-size:0.72rem;color:var(--text);font-weight:500;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jc-date-cell{font-size:0.68rem;color:var(--text3);white-space:nowrap;font-family:var(--mono)}
+.jc-date-cell.overdue{color:#ef4444;font-weight:600}
+.jc-date-cell.urgent{color:#d97706;font-weight:600}
+.jc-date-cell.ok{color:#059669}
+
+/* Comment cell */
+.jc-comment-cell{min-width:280px;max-width:420px}
+.jc-comment-loading{color:var(--text4);font-size:0.68rem;font-style:italic;display:flex;align-items:center;gap:5px}
+.jc-comment-spinner{width:12px;height:12px;border:2px solid #e2e8f0;border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0}
+.jc-comment-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px}
+.jc-comment-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:8px}
+.jc-comment-author{font-size:0.64rem;font-weight:700;color:var(--accent)}
+.jc-comment-ts{font-size:0.59rem;color:var(--text4);white-space:nowrap;flex-shrink:0}
+.jc-comment-body{font-size:0.7rem;color:var(--text);line-height:1.5;max-height:80px;overflow:hidden;position:relative}
+.jc-comment-body.expanded{max-height:none}
+.jc-comment-more{font-size:0.62rem;color:var(--accent);cursor:pointer;margin-top:3px;display:inline-block}
+.jc-comment-none{color:var(--text4);font-size:0.67rem;font-style:italic}
+.jc-comment-err{color:#ef4444;font-size:0.67rem}
+
+/* Empty/loading state */
+.jc-empty{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 20px;text-align:center;
+}
+.jc-empty-icon{font-size:3rem;margin-bottom:14px;opacity:0.5}
+.jc-empty-title{font-size:1rem;font-weight:700;color:var(--text2);margin-bottom:6px}
+.jc-empty-sub{font-size:0.78rem;color:var(--text3);max-width:380px;line-height:1.55}
+
+/* Refresh all btn */
+.jc-refresh-all-btn{
+  font-family:var(--font);font-size:0.71rem;padding:6px 12px;border-radius:6px;
+  border:1px solid #cbd5e1;background:#f8fafc;color:#475569;cursor:pointer;
+  transition:all 0.15s;display:flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0;
+}
+.jc-refresh-all-btn:hover{border-color:var(--accent);color:var(--accent);background:#eff6ff}
+
+/* Hierarchy indentation */
+.jc-indent{padding-left:28px!important;border-left:3px solid #e0f2fe}
+.jc-epic-marker{font-size:0.6rem;background:#dbeafe;color:#1d4ed8;padding:1px 5px;border-radius:4px;font-weight:700;margin-right:4px;white-space:nowrap}
+.jc-story-marker{width:6px;height:6px;border-radius:50%;background:#a855f7;flex-shrink:0;display:inline-block;margin-right:5px}
+
+/* Column drag-and-drop feedback */
+.col-drag-active { opacity: 0.45 !important; cursor: grabbing !important; }
+.col-drag-over   { background: rgba(2,132,199,0.12) !important; border-top: 2px solid var(--accent) !important; }
+
+/* ── COLLAPSIBLE COLUMN TRANSITION ── */
+.gc-data-cell { transition: width 0.2s ease, min-width 0.2s ease; }
+.gc-start-cell { display:flex;align-items:center;justify-content:center; }
+.gc-target-end-cell { display:flex;align-items:center;justify-content:center;background:#f0f9ff; }
+.gc-status-cell { display:flex;align-items:center;justify-content:center; }
+.gc-assignee-cell { display:flex;align-items:center; font-size:0.68rem;color:var(--text2); overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+
+/* Column management controls */
+.col-ctrl-btn {
+  display:inline-flex;align-items:center;justify-content:center;
+  width:14px;height:14px;border-radius:3px;flex-shrink:0;
+  transition:background 0.12s,opacity 0.12s;
+  line-height:1;
+}
+.col-ctrl-btn:hover { background:rgba(0,0,0,0.1); opacity:1!important; }
+
+/* Overdue bar pulse animation */
+@keyframes overduePulse {
+  0%,100% { box-shadow:0 0 0 1px #7f1d1d,0 2px 12px rgba(180,0,0,0.7),0 0 20px rgba(220,0,0,0.35); }
+  50%      { box-shadow:0 0 0 1px #b91c1c,0 2px 16px rgba(220,0,0,0.9),0 0 28px rgba(255,0,0,0.5); }
+}
+.g-bar.bar-overdue {
+  animation: overduePulse 2s ease-in-out infinite;
+  border: 1px solid #7f1d1d;
+}
+
+/* ── COLLAPSIBLE SIDEBAR ── */
+.sidebar{transition:width 0.22s ease, min-width 0.22s ease;}
+.sidebar.collapsed{width:32px!important;min-width:32px!important;}
+.sidebar.collapsed .sidebar-body,
+.sidebar.collapsed .sidebar-hdr-title{display:none!important;}
+.sidebar-collapse-btn{
+  background:none;border:none;color:rgba(255,255,255,0.7);cursor:pointer;
+  font-size:15px;padding:2px 4px;border-radius:4px;transition:all 0.15s;flex-shrink:0;
+  line-height:1;
+}
+.sidebar-collapse-btn:hover{background:rgba(255,255,255,0.15);color:#fff;}
+.sidebar.collapsed .sidebar-collapse-btn{margin:auto;}
+
+/* ── RAW DATA TABLE ── */
+#rawTable th { white-space:nowrap; }
+#rawTable td { font-size:0.67rem; }
+#rawTableWrap { display:flex; flex-direction:column; }
+#rawEmpty { display:flex; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">📋</div>
+    <div>
+      <div class="logo-text">Jira Roadmaps - AI &amp; Automation</div>
+      <div class="logo-sub">Timeline View</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="spinner" id="globalSpinner"></div>
+    <button class="tb-btn" onclick="openTeamsModal()">💬 Teams Nudge</button>
+    <button class="tb-btn primary" id="configureBtn" onclick="openConfigureModal()">⚙️ Configure Jira</button>
+    <button class="tb-btn primary" id="connectBtn" onclick="connectJiraFromFile()" title="Auto-load config from C:\Downloads\JiraRoadmap\jira-config.json">🔌 Connect Jira</button>
+  </div>
+</div>
+
+<!-- TABS BAR -->
+<div class="tab-bar">
+  <button class="tab-btn active" id="tab-dev" onclick="switchTab('dev')">
+    <div class="tab-dot" style="background:#38bdf8"></div>Development Progress
+  </button>
+</div>
+
+<!-- MAIN BODY -->
+<div class="main-body">
+
+<!-- ═══════ TAB: DEVELOPMENT PROGRESS ═══════ -->
+<div class="tab-panel active" id="panel-dev">
+
+  <!-- LEFT SIDEBAR -->
+  <div class="sidebar" id="mainSidebar">
+    <div class="sidebar-hdr" style="display:flex;align-items:center;justify-content:space-between">
+      <div class="sidebar-hdr-title">🔍 Filters & JQL</div>
+      <button class="sidebar-collapse-btn" onclick="toggleSidebar()" id="sidebarCollapseBtn" title="Collapse sidebar">◀</button>
+    </div>
+    <div class="sidebar-body">
+
+      <!-- JQL Panel (tab-scoped) -->
+      <div class="jql-box">
+        <div class="jql-box-title">📝 JQL Query <span id="activeTabLabel" style="font-size:0.58rem;background:rgba(255,255,255,0.15);padding:1px 6px;border-radius:8px;margin-left:4px;text-transform:none;letter-spacing:0">Dev</span></div>
+        <textarea class="jql-textarea" id="roadmapJql"
+          placeholder="project in (PROJ) AND issuetype in (Epic,Story,Task) AND statusCategory != Done ORDER BY duedate ASC"></textarea>
+        <button class="jql-apply-btn" onclick="applyRoadmapJql()">▶ Apply JQL</button>
+      </div>
+
+      <!-- Status filters -->
+      <div class="filter-box">
+        <div class="filter-title">Status Filter</div>
+        <div class="tag-row" id="statusFilters">
+          <div class="tag active" onclick="toggleStatusFilter(this,'all')" data-f="all">All</div>
+          <div class="tag" onclick="toggleStatusFilter(this,'To Do')" data-f="To Do">To Do</div>
+          <div class="tag" onclick="toggleStatusFilter(this,'In Progress')" data-f="In Progress">In Progress</div>
+          <div class="tag" onclick="toggleStatusFilter(this,'In Review')" data-f="In Review">In Review</div>
+          <div class="tag" onclick="toggleStatusFilter(this,'Done')" data-f="Done">Done</div>
+          <div class="tag" onclick="toggleStatusFilter(this,'Blocked')" data-f="Blocked">Blocked</div>
+          <div class="tag" onclick="toggleStatusFilter(this,'On Hold')" data-f="On Hold">On Hold</div>
+        </div>
+      </div>
+
+      <!-- Epic Tree Panel -->
+      <div class="epic-tree-section" id="epicTreeSection">
+        <div class="epic-tree-header" onclick="toggleEpicTree()">
+          <div class="epic-tree-title">🌳 Epic Hierarchy</div>
+          <span class="epic-tree-toggle open" id="epicTreeToggle">▶</span>
+        </div>
+        <div class="epic-tree-body open" id="epicTreeBody">
+          <div style="text-align:center;padding:10px;font-size:0.68rem;color:rgba(255,255,255,0.35)">No epics loaded</div>
+        </div>
+      </div>
+
+      <!-- Issue list -->
+      <div class="issue-list-section">
+        <div class="issue-list-title">
+          <span>Issues</span>
+          <span class="issue-count-badge" id="issueCount">0</span>
+        </div>
+        <div id="issueList"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GANTT MAIN AREA -->
+  <div class="gantt-area">
+
+    <!-- Controls bar -->
+    <div class="ctrl-bar">
+      <div class="dp-wrap" id="dpWrap">
+        <div class="nav-btn" onclick="navigate(-1)" style="margin-right:4px">‹</div>
+        <div class="period-label" id="periodLabel" onclick="toggleDatePicker(event)" title="Click to pick date">—</div>
+        <div class="nav-btn" onclick="navigate(1)" style="margin-left:4px">›</div>
+        <div class="dp-dropdown" id="dpDropdown">
+          <div class="dp-nav-row">
+            <button class="dp-nav-btn" onclick="dpNav(-1,event)">‹</button>
+            <div class="dp-month-label" id="dpLabel"></div>
+            <button class="dp-nav-btn" onclick="dpNav(1,event)">›</button>
+          </div>
+          <div class="dp-grid" id="dpDayNames"></div>
+          <div class="dp-grid" id="dpDays"></div>
+        </div>
+      </div>
+
+      <button class="ctrl-btn" onclick="goToToday()">📅 Today</button>
+
+      <div class="ctrl-sep"></div>
+
+      <!-- View span -->
+      <span style="font-size:0.65rem;color:var(--text3);white-space:nowrap">Span:</span>
+      <input type="range" id="spanRange" min="90" max="240" value="120" step="30"
+        style="width:80px;accent-color:var(--accent);cursor:pointer;flex-shrink:0"
+        oninput="spanMonths=Math.round(parseInt(this.value)/30);ganttDays=parseInt(this.value);document.getElementById('spanLabel').textContent=Math.round(this.value/30)+'mo';renderGantt()">
+      <span id="spanLabel" style="font-size:0.65rem;color:var(--accent);min-width:28px;white-space:nowrap">4mo</span>
+
+      <div class="ctrl-sep"></div>
+
+      <!-- Dependency controls -->
+      <button class="ctrl-btn" id="depsBtn" onclick="toggleDependencies()">🔗 Deps: OFF</button>
+      <button class="ctrl-btn" id="connectModeBtn" onclick="toggleConnectMode()">🖇 Connect</button>
+      <button class="ctrl-btn warn" onclick="clearCustomDeps()" title="Clear custom dependency links">✕ Clear Deps</button>
+      <button class="ctrl-btn" id="undoDepBtn" onclick="undoLastDep()" style="opacity:0.4" disabled>↩ Undo</button>
+
+      <div class="ctrl-sep"></div>
+
+      <!-- Zoom controls -->
+      <div class="zoom-group">
+        <span style="font-size:0.65rem;color:var(--text3);white-space:nowrap">Zoom:</span>
+        <div class="zoom-btn" onclick="zoomGantt(-1)" title="Zoom out">−</div>
+        <span class="zoom-label" id="zoomLabel">1×</span>
+        <div class="zoom-btn" onclick="zoomGantt(1)" title="Zoom in">+</div>
+        <div class="zoom-btn" onclick="zoomReset()" title="Reset zoom" style="font-size:10px;width:auto;padding:0 5px">↺</div>
+      </div>
+
+    </div>
+
+    <!-- Stats bar -->
+    <div class="stats-bar" id="statsBar">
+      <div class="sstat"><div class="sstat-dot" style="background:#94a3b8"></div>To Do <span class="sstat-num" id="st-todo">0</span></div>
+      <div class="sstat"><div class="sstat-dot" style="background:#fbbf24"></div>In Progress <span class="sstat-num" id="st-prog">0</span></div>
+      <div class="sstat"><div class="sstat-dot" style="background:#38bdf8"></div>In Review <span class="sstat-num" id="st-rev">0</span></div>
+      <div class="sstat"><div class="sstat-dot" style="background:#34d399"></div>Done/Closed <span class="sstat-num" id="st-done">0</span></div>
+      <div class="sstat"><div class="sstat-dot" style="background:#f87171"></div>Blocked <span class="sstat-num" id="st-block">0</span></div>
+      <div class="sstat"><div class="sstat-dot" style="background:#a78bfa"></div>On Hold <span class="sstat-num" id="st-hold">0</span></div>
+      <div class="sstat" style="margin-left:auto"><div class="sstat-dot" style="background:#ef4444"></div>Overdue <span class="sstat-num" id="st-overdue" style="color:#ef4444">0</span></div>
+    </div>
+
+    <!-- Epic color legend -->
+    <div class="legend-bar" id="epicLegend" style="display:none"></div>
+
+    <!-- Gantt content -->
+    <div class="gantt-content">
+      <div class="gantt-scroll" id="ganttScroll">
+
+        <!-- Empty state -->
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">🗓️</div>
+          <div class="empty-title">No issues loaded</div>
+          <div class="empty-sub">Enter a JQL query and click Apply to see the Gantt chart.</div>
+          <div class="empty-actions">
+            <button class="btn primary" onclick="openConfigureModal()">⚙️ Configure Jira</button>
+          </div>
+        </div>
+
+        <!-- Gantt chart (built dynamically) -->
+        <div id="ganttInner" style="display:none"></div>
+
+      </div>
+      <div class="hscroll-bar" id="hscrollBar">
+        <input type="range" id="hscroll" min="0" max="1000" value="0">
+      </div>
+    </div>
+
+  </div><!-- /gantt-area -->
+</div><!-- /panel-dev -->
+
+<!-- ═══════ TAB: SIT PROGRESS (duplicate of Dev) ═══════ -->
+
+</div><!-- /main-body -->
+
+<!-- TOASTS -->
+<div class="toast-area" id="toastArea"></div>
+
+<!-- CONNECT MODE BANNER -->
+<div class="connect-mode-banner" id="connectBanner">
+  🖇 Connect Mode ON — click source bar, then target bar
+</div>
+
+<!-- CONFIGURE JIRA MODAL -->
+<div class="modal-overlay" id="connectModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-tag">⚙️ JIRA CONFIGURATION</div>
+        <div class="modal-title">Configure Jira</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('connectModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-box" id="cfInfoBox">
+        ⚙️ <strong>Enter your Jira credentials and click <em>💾 Save & Connect</em>.</strong><br>
+        Settings are saved locally and a <code>jira-config.json</code> is downloaded to <code>C:\Downloads\JiraRoadmap\</code> for next time.
+      </div>
+      <div class="field-group">
+        <label class="field-label">Jira Base URL</label>
+        <input class="field-input" id="cfJiraUrl" placeholder="https://yourcompany.atlassian.net">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Email</label>
+        <input class="field-input" id="cfEmail" placeholder="you@company.com">
+      </div>
+      <div class="field-group">
+        <label class="field-label">API Token <span style="font-size:0.6rem;color:var(--text4)">(Atlassian → Security → API tokens)</span></label>
+        <input class="field-input" id="cfToken" type="password" placeholder="Your Jira API Token">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Project Key(s)</label>
+        <input class="field-input" id="cfProjects" placeholder="PROJ,APP,BE" oninput="syncJqlPrefix()">
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('connectModal')">Cancel</button>
+      <button class="btn" onclick="exportConfigJson()" title="Download config as JSON file">⬇ Export JSON</button>
+      <button class="btn primary" onclick="saveJiraConfig()">💾 Save & Connect</button>
+    </div>
+  </div>
+</div>
+
+<!-- ISSUE DETAIL MODAL -->
+<div class="modal-overlay" id="issueModal">
+  <div class="modal" style="max-width:620px;width:96vw">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-tag" id="m-key"></div>
+        <div class="modal-title" id="m-title"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('issueModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-grid">
+        <div class="modal-field"><label>Status</label><div class="val" id="m-status"></div></div>
+        <div class="modal-field"><label>Priority</label><div class="val" id="m-priority"></div></div>
+        <div class="modal-field"><label>Assignee</label><div class="val" id="m-assignee"></div></div>
+        <div class="modal-field"><label>Type</label><div class="val" id="m-type"></div></div>
+        <div class="modal-field"><label>Start Date</label><div class="val" id="m-start"></div></div>
+        <div class="modal-field"><label>Due Date</label><div class="val" id="m-due"></div></div>
+        <div class="modal-field" style="grid-column:1/-1"><label>Epic / Parent</label><div class="val" id="m-parent" style="color:var(--sky-600)"></div></div>
+      </div>
+
+      <!-- Existing Comments -->
+      <div style="margin-bottom:6px;font-size:0.63rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;font-weight:700;display:flex;align-items:center;justify-content:space-between">
+        <span>💬 Jira Comments</span>
+        <button onclick="fetchComments(selectedIssue?.key)" style="font-family:var(--font);font-size:0.6rem;padding:2px 8px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);color:var(--text3);cursor:pointer">🔄 Refresh</button>
+      </div>
+      <div id="m-comments" style="display:flex;flex-direction:column;gap:7px;max-height:180px;overflow-y:auto;margin-bottom:14px">
+        <div style="text-align:center;padding:14px;color:var(--text3);font-size:0.72rem">Loading…</div>
+      </div>
+
+      <!-- Add Comment to Jira -->
+      <div style="background:linear-gradient(135deg,#f0f9ff,#f8fafc);border:1px solid #bae6fd;border-radius:10px;padding:12px 14px">
+        <div style="font-size:0.63rem;color:#0369a1;text-transform:uppercase;letter-spacing:0.6px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:5px">
+          <span>✏️</span> Add Comment to Jira
+        </div>
+<textarea id="newCommentText" rows="3"
+          placeholder="Type your comment here… (will be posted directly to this Jira issue)"
+          style="width:100%;font-family:var(--font);font-size:0.74rem;padding:9px 11px;border:1px solid #7dd3fc;border-radius:7px;background:#fff;color:var(--text);outline:none;resize:vertical;line-height:1.55;transition:border-color 0.15s"
+          onfocus="this.style.borderColor='#0284c7'" onblur="this.style.borderColor='#7dd3fc'"></textarea>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;gap:8px">
+          <span id="commentPostStatus" style="font-size:0.65rem;color:var(--text3);font-family:var(--mono)"></span>
+          <div style="display:flex;gap:7px">
+            <button onclick="document.getElementById('newCommentText').value=''" style="font-family:var(--font);font-size:0.7rem;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text3);cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">Clear</button>
+            <button id="postCommentBtn" onclick="postCommentToJira()"
+              style="font-family:var(--font);font-size:0.72rem;font-weight:700;padding:6px 16px;border-radius:6px;border:none;background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;cursor:pointer;display:flex;align-items:center;gap:6px;transition:opacity 0.15s"
+              onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+              <span id="postCommentIcon">📤</span> Send to Jira
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('issueModal')">Close</button>
+      <button class="btn primary" id="openJiraBtn" onclick="openInJira()">↗ Open in Jira</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEAMS NUDGE MODAL -->
+<div class="modal-overlay" id="teamsModal">
+  <div class="modal modal-wide">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-tag">💬 MS TEAMS INTEGRATION</div>
+        <div class="modal-title">Send Overdue Nudges via Teams</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('teamsModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-box">
+        📌 <strong>Two delivery methods are available:</strong><br>
+        <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
+          <div style="background:rgba(0,120,212,0.08);border:1px solid rgba(0,120,212,0.25);border-radius:6px;padding:8px 10px;font-size:0.63rem;line-height:1.7">
+            <strong style="color:#0078d4">📲 DM via Teams Deep Link (no webhook, no Group ID needed)</strong><br>
+            Click <strong>📲 DM</strong> next to any overdue item to open a pre-composed Teams DM directly to the assignee. 
+            Requires Jira to return the assignee's email (standard for Jira Cloud). No configuration needed.
+          </div>
+          <div style="background:rgba(80,89,201,0.08);border:1px solid rgba(80,89,201,0.25);border-radius:6px;padding:8px 10px;font-size:0.63rem;line-height:1.7">
+            <strong style="color:#5059C9">💬 Nudge via Incoming Webhook (channel post)</strong><br>
+            To post to a Teams <em>channel</em>: Teams Channel → ··· → Connectors → Incoming Webhook → Create → Copy URL. 
+            Paste it below. Uses your Cloudflare proxy for confirmed delivery.
+          </div>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Teams Incoming Webhook URL</label>
+        <input class="field-input" id="teamsWebhookUrl" placeholder="https://xxx.webhook.office.com/webhookb2/..." 
+          oninput="localStorage.setItem('teamsWebhookUrl',this.value)">
+      </div>
+      <div class="nudge-section">
+        <div class="nudge-section-title">🚨 Overdue Stories — click <strong style="color:#5059C9">💬 Nudge</strong> per item, or use <strong style="color:#5059C9">📤 Send All</strong> below</div>
+        <div class="overdue-list" id="overdueList">
+          <div style="text-align:center;padding:12px;color:var(--text3);font-size:0.72rem">Load issues first to see overdue stories</div>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Custom Message (optional)</label>
+        <input class="field-input" id="teamsCustomMsg" placeholder="Friendly reminder: please update your story status in Jira 🙏">
+      </div>
+      <div id="teamsSentStatus" style="display:none"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('teamsModal')">Cancel</button>
+      <button class="btn" onclick="previewTeamsNudge()">👁 Preview</button>
+      <button class="btn teams" onclick="sendTeamsNudges()">📤 Send Teams Nudge</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ══ HARDCODED PROXY — change this to your Cloudflare Worker URL ══
+const PROXY_URL = 'https://cool-queen-c9f2.jirapoc.workers.dev';
+
+// ══ SIDEBAR COLLAPSE ══
+function toggleSidebar(){
+  const sb = document.getElementById('mainSidebar');
+  const btn = document.getElementById('sidebarCollapseBtn');
+  const collapsed = sb.classList.toggle('collapsed');
+  btn.textContent = collapsed ? '▶' : '◀';
+  btn.title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+}
+
+// ══ MISSING UTILITY FUNCTIONS ══
+
+function showToast(msg, type = 'info') {
+  const area = document.getElementById('toastArea');
+  if (!area) return;
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  area.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.4s'; setTimeout(() => t.remove(), 400); }, 3500);
+}
+
+function setLoading(active) {
+  const spinner = document.getElementById('globalSpinner');
+  if (spinner) spinner.classList.toggle('active', active);
+  // Also dim connect/configure buttons while loading
+  const conBtn = document.getElementById('connectBtn');
+  const cfgBtn = document.getElementById('configureBtn');
+  if (conBtn) conBtn.disabled = active;
+  if (cfgBtn) cfgBtn.disabled = active;
+}
+
+// ══ STATE ══
+let issues = [], filteredIssues = [], selectedIssue = null;
+let activeStatusFilters = new Set(['all']);
+let jiraConfig = {url:'',email:'',proxyUrl:'',projects:'',jql:'',token:'',teamsWebhookUrl:'',targetEndField:'customfield_10015',requiredByField:'customfield_10022'};
+let ganttDays = 120;
+let viewStart = new Date();
+let dpYear, dpMonth;
+let showDeps = false;
+let connectMode = false;
+let connectSource = null;
+let customDeps = [];
+let depsUndoStack = [];
+let zoomLevel = 1; // 1=default, 0.5=zoomed out, 2,3,4=zoomed in
+const ZOOM_LEVELS = [0.4, 0.6, 0.8, 1, 1.5, 2, 3, 4];
+let zoomIdx = 3; // index into ZOOM_LEVELS, default = 1x
+
+// Raw Jira data (full API response, pre-mapping)
+let rawJiraIssues = [];
+
+// Collapsible gantt column state
+const ganttCols = {
+  start:      { collapsed: false, w: 82,  label: 'Start date' },
+  due:        { collapsed: false, w: 82,  label: 'Due Date' },
+  targetEnd:  { collapsed: false, w: 82,  label: 'Target End' },
+  requiredBy: { collapsed: false, w: 90,  label: 'Req. By Date' },
+  assignee:   { collapsed: false, w: 92,  label: 'Assignee' },
+  status:     { collapsed: false, w: 96,  label: 'Status' },
+};
+
+// ── TAB STATE ──
+let activeTab = 'dev';
+const tabState = {
+  sit: { issues:[], filteredIssues:[], activeFilters: new Set(['all']), ganttDays:120, viewStart:new Date(), zoomIdx:3, jql:'', dpYear:null, dpMonth:null },
+  uat: { issues:[], filteredIssues:[], activeFilters: new Set(['all']), ganttDays:120, viewStart:new Date(), zoomIdx:3, jql:'', dpYear:null, dpMonth:null },
+};
+
+// ══ SORT STATE ══
+let sortCol = null; // 'summary'|'epic'|'start'|'due'|'status'|'assignee'
+let sortDir = 'asc'; // 'asc'|'desc'
+
+// ══ EPIC COLOR PALETTE ══
+const EPIC_COLORS = [
+  {bg:'linear-gradient(90deg,#0369a1,#0ea5e9)', solid:'#0369a1'},
+  {bg:'linear-gradient(90deg,#7c3aed,#a855f7)', solid:'#7c3aed'},
+  {bg:'linear-gradient(90deg,#059669,#10b981)', solid:'#059669'},
+  {bg:'linear-gradient(90deg,#d97706,#f59e0b)', solid:'#d97706'},
+  {bg:'linear-gradient(90deg,#dc2626,#ef4444)', solid:'#dc2626'},
+  {bg:'linear-gradient(90deg,#0891b2,#22d3ee)', solid:'#0891b2'},
+  {bg:'linear-gradient(90deg,#9333ea,#c084fc)', solid:'#9333ea'},
+  {bg:'linear-gradient(90deg,#16a34a,#4ade80)', solid:'#16a34a'},
+  {bg:'linear-gradient(90deg,#b45309,#f59e0b)', solid:'#b45309'},
+  {bg:'linear-gradient(90deg,#be185d,#ec4899)', solid:'#be185d'},
+];
+
+function epicColor(idx){ return EPIC_COLORS[idx % EPIC_COLORS.length]; }
+
+// ══ DATE HELPERS ══
+function parseDate(s){
+  if(!s) return null;
+  const p=s.split('-');
+  if(p.length===3) return new Date(+p[0],+p[1]-1,+p[2]);
+  return new Date(s);
+}
+function fmtDate(s){
+  const d=parseDate(s);
+  if(!d) return 'Not available';
+  return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
+function fmtShort(s){
+  const d=parseDate(s);
+  if(!d) return '';
+  return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
+}
+// Returns a new Date that is `n` working days (Mon–Fri) before `date`
+function subtractWorkingDays(date, n){
+  const d = new Date(date.getTime());
+  let remaining = n;
+  while(remaining > 0){
+    d.setDate(d.getDate() - 1);
+    const dow = d.getDay();
+    if(dow !== 0 && dow !== 6) remaining--; // skip Sun(0) and Sat(6)
+  }
+  return d;
+}
+function daysFromStart(date){
+  if(!date) return null;
+  const d = date instanceof Date ? date : parseDate(date);
+  if(!d) return null;
+  return Math.floor((d - viewStart) / 86400000);
+}
+
+// ══ INIT ══
+window.onload = () => {
+  // Load saved config
+  const saved = localStorage.getItem('jiraGanttConfig');
+  if(saved){
+    try {
+      jiraConfig = JSON.parse(saved);
+      if(jiraConfig.url) document.getElementById('cfJiraUrl').value = jiraConfig.url;
+      if(jiraConfig.email) document.getElementById('cfEmail').value = jiraConfig.email;
+      if(jiraConfig.projects) document.getElementById('cfProjects').value = jiraConfig.projects;
+      if(jiraConfig.jql) document.getElementById('roadmapJql').value = jiraConfig.jql;
+    } catch{}
+  }
+
+  // Populate field ID inputs from saved config
+  const teInput = document.getElementById('cfTargetEndField');
+  const rbInput = document.getElementById('cfRequiredByField');
+  if(teInput) teInput.value = jiraConfig.targetEndField || 'customfield_10015';
+  if(rbInput) rbInput.value = jiraConfig.requiredByField || 'customfield_10022';
+
+  // Grey out Connect Jira button if config file was already saved
+  updateBtnStates();
+
+  // Horizontal scroll sync for DEV tab
+  const scroll = document.getElementById('ganttScroll');
+  const hrange = document.getElementById('hscroll');
+  if(scroll && hrange){
+    hrange.addEventListener('input', () => { scroll.scrollLeft = parseInt(hrange.value); });
+    scroll.addEventListener('scroll', () => {
+      hrange.max = Math.max(0, scroll.scrollWidth - scroll.clientWidth);
+      hrange.value = scroll.scrollLeft;
+    }, {passive:true});
+  }
+
+
+  // Close date picker on outside click
+  document.addEventListener('click', e => {
+    const w = document.getElementById('dpWrap');
+    if(w && !w.contains(e.target)) closeDatePicker();
+  });
+
+  goToToday();
+};
+
+// ══ NAVIGATION ══
+function goToToday(){
+  const t = new Date(); t.setHours(0,0,0,0);
+  // Start at the 1st of the current month
+  const s = new Date(t.getFullYear(), t.getMonth(), 1);
+  viewStart = s;
+  // Show current month + next 3 months = ~4 months = ~120 days
+  ganttDays = 120;
+  document.getElementById('spanRange').value = ganttDays;
+  document.getElementById('spanLabel').textContent = '4mo';
+  renderGantt();
+}
+function navigate(dir){
+  const delta = Math.round(ganttDays / 3);
+  viewStart = new Date(viewStart.getTime() + dir * delta * 86400000);
+  renderGantt();
+}
+function updatePeriodLabel(){
+  const e = new Date(viewStart.getTime() + (ganttDays-1)*86400000);
+  const s = viewStart.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+  const en = e.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+  document.getElementById('periodLabel').textContent = s === en ? s : `${s} – ${en}`;
+}
+
+// ══ DATE PICKER ══
+function toggleDatePicker(ev){
+  ev && ev.stopPropagation();
+  const dd = document.getElementById('dpDropdown');
+  if(dd.classList.contains('open')){ closeDatePicker(); return; }
+  const vs = new Date(viewStart);
+  dpYear = vs.getFullYear(); dpMonth = vs.getMonth();
+  buildDatePicker();
+  dd.classList.add('open');
+}
+function closeDatePicker(){ document.getElementById('dpDropdown').classList.remove('open'); }
+function dpNav(dir,ev){
+  ev && ev.stopPropagation();
+  dpMonth += dir;
+  if(dpMonth>11){dpMonth=0;dpYear++;}
+  if(dpMonth<0){dpMonth=11;dpYear--;}
+  buildDatePicker();
+}
+function buildDatePicker(){
+  const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('dpLabel').textContent = `${MN[dpMonth]} ${dpYear}`;
+  document.getElementById('dpDayNames').innerHTML = ['Su','Mo','Tu','We','Th','Fr','Sa'].map(d=>`<div class="dp-dayname">${d}</div>`).join('');
+  const first = new Date(dpYear,dpMonth,1).getDay();
+  const dim = new Date(dpYear,dpMonth+1,0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const sel = new Date(viewStart); sel.setHours(0,0,0,0);
+  let h='';
+  for(let i=0;i<first;i++) h+=`<div class="dp-day empty"></div>`;
+  for(let d=1;d<=dim;d++){
+    const dt=new Date(dpYear,dpMonth,d);
+    const iT=dt.getTime()===today.getTime(), iS=dt.getTime()===sel.getTime();
+    h+=`<div class="dp-day ${iT?'today':''} ${iS?'selected':''}" onclick="dpPick(${dpYear},${dpMonth},${d},event)">${d}</div>`;
+  }
+  document.getElementById('dpDays').innerHTML = h;
+}
+function dpPick(y,m,d,ev){
+  ev && ev.stopPropagation();
+  viewStart = new Date(y,m,d); viewStart.setHours(0,0,0,0);
+  renderGantt(); closeDatePicker();
+}
+
+// ══ STATUS FILTER ══
+function toggleStatusFilter(el, status){
+  if(status==='all'){
+    activeStatusFilters = new Set(['all']);
+    document.querySelectorAll('#statusFilters .tag').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+  } else {
+    activeStatusFilters.delete('all');
+    document.querySelector('#statusFilters .tag[data-f="all"]').classList.remove('active');
+    if(activeStatusFilters.has(status)){ activeStatusFilters.delete(status); el.classList.remove('active'); }
+    else { activeStatusFilters.add(status); el.classList.add('active'); }
+    if(activeStatusFilters.size===0){
+      activeStatusFilters = new Set(['all']);
+      document.querySelector('#statusFilters .tag[data-f="all"]').classList.add('active');
+    }
+  }
+  applyFilters();
+}
+function applyFilters(){
+  const norm = s => (s||'').toLowerCase()==='new'?'To Do':s;
+  filteredIssues = issues.filter(i=>{
+    const sn = norm(i.status);
+    return activeStatusFilters.has('all') || activeStatusFilters.has(sn);
+  });
+  renderIssueList();
+  renderStats();
+  renderGantt();
+  renderEpicTree(null);
+}
+
+// ══ STATS ══
+function renderStats(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  let todo=0,prog=0,rev=0,done=0,block=0,hold=0,over=0;
+  filteredIssues.forEach(i=>{
+    const l=(i.status||'').toLowerCase();
+    if(l.includes('done')||l.includes('closed')||l.includes('resolved')) done++;
+    else if(l.includes('progress')) prog++;
+    else if(l.includes('review')) rev++;
+    else if(l.includes('block')) block++;
+    else if(l.includes('hold')) hold++;
+    else todo++;
+    if(i.dueDate && parseDate(i.dueDate)<today && !l.includes('done') && !l.includes('closed')) over++;
+  });
+  ['todo','prog','rev','done','block','hold','overdue'].forEach((k,idx)=>{
+    const el=document.getElementById('st-'+k);
+    if(el) el.textContent=[todo,prog,rev,done,block,hold,over][idx];
+  });
+}
+
+// ══ ISSUE LIST SIDEBAR ══
+function renderIssueList(){
+  const el = document.getElementById('issueList');
+  document.getElementById('issueCount').textContent = filteredIssues.length;
+  if(!filteredIssues.length){
+    el.innerHTML='<div style="text-align:center;padding:16px;font-size:0.71rem;color:rgba(255,255,255,0.4)">No issues match filters</div>';
+    return;
+  }
+  const today = new Date(); today.setHours(0,0,0,0);
+  el.innerHTML = filteredIssues.slice(0,150).map(i=>{
+    const sel = selectedIssue?.key===i.key;
+    const sc = getStatusClass(i.status);
+    let dueTxt='';
+    if(i.dueDate){
+      const due = parseDate(i.dueDate);
+      const diff = Math.round((due-today)/86400000);
+      const isOv = diff<0 && !i.status.toLowerCase().includes('done');
+      const isSoon = diff>=0 && diff<=5;
+      const cls = isOv?'overdue':isSoon?'soon':'';
+      const txt = isOv?`${Math.abs(diff)}d overdue`:diff===0?'Due today':`in ${diff}d`;
+      dueTxt=`<span class="due-pill ${cls}">📅 ${txt}</span>`;
+    }
+    return `<div class="il-item ${sel?'selected':''}" onclick="openIssueDetail('${i.key}')">
+      <div class="il-key">${i.type==='Epic'?'⚡':''} ${i.key}</div>
+      <div class="il-summary">${i.summary}</div>
+      <div class="il-meta">
+        <span class="sbadge ${sc}">${i.status}</span>
+        ${dueTxt}
+      </div>
+    </div>`;
+  }).join('');
+}
+function getStatusClass(s){
+  const l=(s||'').toLowerCase();
+  if(l.includes('done')||l.includes('closed')||l.includes('resolved')) return 's-closed';
+  if(l.includes('progress')) return 's-inprog';
+  if(l.includes('review')) return 's-review';
+  if(l.includes('block')) return 's-blocked';
+  if(l.includes('cancel')) return 's-cancel';
+  if(l.includes('hold')) return 's-hold';
+  return 's-todo';
+}
+function getTargetEndColor(iss){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const te = iss.dueDate;
+  if(!te) return 'var(--text3)';
+  const d = parseDate(te);
+  if(!d) return 'var(--text3)';
+  const isDone = (iss.status||'').toLowerCase().includes('done')||(iss.status||'').toLowerCase().includes('closed');
+  if(isDone) return '#059669';
+  const diff = Math.floor((d - today)/86400000);
+  if(diff < 0) return '#ef4444';
+  if(diff <= 7) return '#d97706';
+  return '#475569';
+}
+
+// ══ DEPENDENCIES ══
+function toggleDependencies(){
+  showDeps = !showDeps;
+  const btn = document.getElementById('depsBtn');
+  btn.textContent = `🔗 Deps: ${showDeps?'ON':'OFF'}`;
+  btn.classList.toggle('active', showDeps);
+  renderGantt();
+}
+function toggleConnectMode(){
+  connectMode = !connectMode;
+  connectSource = null;
+  const btn = document.getElementById('connectModeBtn');
+  btn.classList.toggle('active', connectMode);
+  btn.textContent = connectMode ? '🖇 Connecting…' : '🖇 Connect';
+  document.getElementById('connectBanner').classList.toggle('visible', connectMode);
+  if(connectMode && !showDeps){ showDeps=true; document.getElementById('depsBtn').textContent='🔗 Deps: ON'; document.getElementById('depsBtn').classList.add('active'); }
+  renderGantt();
+}
+function clearCustomDeps(){
+  depsUndoStack.push([...customDeps]);
+  customDeps=[];
+  updateUndoBtn();
+  showToast('Custom dependency links cleared','info');
+  renderGantt();
+}
+function undoLastDep(){
+  if(!depsUndoStack.length){showToast('Nothing to undo','info');return;}
+  customDeps = depsUndoStack.pop();
+  updateUndoBtn();
+  showToast('Dependency change undone','info');
+  renderGantt();
+}
+function updateUndoBtn(){
+  const btn = document.getElementById('undoDepBtn');
+  btn.disabled = depsUndoStack.length===0;
+  btn.style.opacity = depsUndoStack.length===0?'0.4':'1';
+}
+function barClick(key, ev){
+  ev.stopPropagation();
+  if(!connectMode){ openIssueDetail(key); return; }
+  if(!connectSource){
+    connectSource = key;
+    document.getElementById('connectBanner').textContent = `🖇 Connected: ${key} → click target bar`;
+    document.querySelectorAll('.g-bar').forEach(b=>b.style.outline='');
+    const src = document.querySelector(`.g-bar[data-key="${key}"]`);
+    if(src) src.style.outline='2px solid #d97706';
+    showToast(`Source: ${key} — now click target bar`, 'info');
+  } else {
+    if(connectSource===key){ showToast('Cannot link to itself','error'); return; }
+    depsUndoStack.push([...customDeps]);
+    const exists = customDeps.some(d=>d.from===connectSource&&d.to===key);
+    if(!exists){ customDeps.push({from:connectSource,to:key}); showToast(`Linked ${connectSource} → ${key}`,'success'); }
+    else { customDeps=customDeps.filter(d=>!(d.from===connectSource&&d.to===key)); showToast(`Removed link ${connectSource} → ${key}`,'info'); }
+    connectSource=null;
+    document.getElementById('connectBanner').textContent='🖇 Connect Mode ON — click source bar, then target bar';
+    updateUndoBtn();
+    renderGantt();
+  }
+}
+function deleteDepLink(from,to){
+  depsUndoStack.push([...customDeps]);
+  customDeps=customDeps.filter(d=>!(d.from===from&&d.to===to));
+  updateUndoBtn();
+  showToast(`Removed link ${from} → ${to}`,'info');
+  renderGantt();
+}
+
+// ══ GANTT RENDER ══
+function renderGantt(){
+  const cont = document.getElementById('ganttInner');
+  const empty = document.getElementById('emptyState');
+  const hs = document.getElementById('hscrollBar');
+  updatePeriodLabel();
+
+  if(!filteredIssues.length){
+    cont.style.display='none'; empty.style.display='flex'; hs.classList.remove('visible');
+    document.getElementById('epicLegend').style.display='none';
+    return;
+  }
+  cont.style.display='block'; empty.style.display='none'; hs.classList.add('visible');
+
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  // Build month boundaries across ganttDays
+  const months = [];
+  let cur = new Date(viewStart.getFullYear(), viewStart.getMonth(), 1);
+  const end = new Date(viewStart.getTime() + ganttDays * 86400000);
+  while(cur <= end){
+    const mStart = new Date(cur);
+    const mEnd = new Date(cur.getFullYear(), cur.getMonth()+1, 0);
+    // Clamp to viewStart..end
+    const dStart = Math.max(0, Math.floor((mStart - viewStart)/86400000));
+    const dEnd = Math.min(ganttDays-1, Math.floor((mEnd - viewStart)/86400000));
+    if(dStart <= ganttDays-1){
+      months.push({ label: mStart.toLocaleDateString('en-US',{month:'short',year:'numeric'}),
+        dStart, dEnd, daysCount: dEnd - dStart + 1,
+        isCurrent: mStart.getMonth()===today.getMonth() && mStart.getFullYear()===today.getFullYear() });
+    }
+    cur.setMonth(cur.getMonth()+1);
+  }
+  const totalDays = ganttDays;
+
+  // Epic/story grouping
+  // Apply sort to filteredIssues before grouping
+  let sortedIssues = [...filteredIssues];
+  if(sortCol){
+    sortedIssues.sort((a,b)=>{
+      let va='', vb='';
+      if(sortCol==='summary'){ va=a.summary||''; vb=b.summary||''; }
+      else if(sortCol==='epic'){ va=a.parentKey||''; vb=b.parentKey||''; }
+      else if(sortCol==='start'){ va=a.startDate||'9999'; vb=b.startDate||'9999'; }
+      else if(sortCol==='due'){ va=a.dueDate||'9999'; vb=b.dueDate||'9999'; }
+      else if(sortCol==='target'){ va=a.dueDate||'9999'; vb=b.dueDate||'9999'; }
+      else if(sortCol==='status'){ va=a.status||''; vb=b.status||''; }
+      else if(sortCol==='assignee'){ va=a.assignee||''; vb=b.assignee||''; }
+      const cmp = va<vb?-1:va>vb?1:0;
+      return sortDir==='asc'?cmp:-cmp;
+    });
+  }
+  const epics = sortedIssues.filter(i=>i.type==='Epic');
+  const stories = sortedIssues.filter(i=>i.type!=='Epic');
+  const epicMap = {};
+  epics.forEach(e=>{ epicMap[e.key]=[]; });
+  const orphans = [];
+  stories.forEach(s=>{
+    if(s.parentKey && epicMap[s.parentKey]!==undefined) epicMap[s.parentKey].push(s);
+    else orphans.push(s);
+  });
+
+  // Derive epic dates from children
+  epics.forEach(epic=>{
+    const ch = epicMap[epic.key]||[];
+    if(ch.length){
+      const starts = ch.map(c=>c.startDate?parseDate(c.startDate):null).filter(Boolean);
+      const ends = ch.map(c=>c.dueDate?parseDate(c.dueDate):null).filter(Boolean);
+      if(!epic.startDate && starts.length) epic._derivedStart = new Date(Math.min(...starts.map(d=>d.getTime()))).toISOString().split('T')[0];
+      if(!epic.dueDate && ends.length) epic._derivedEnd = new Date(Math.max(...ends.map(d=>d.getTime()))).toISOString().split('T')[0];
+    }
+  });
+
+  // Epic color map
+  const epicColorMap = {};
+  epics.forEach((e,i)=>{ epicColorMap[e.key]=i; });
+  const orphanParentColorMap = {};
+  let nextOrphanColor = epics.length;
+
+  function getColor(iss, isEpicRow=false){
+    if(isEpicRow) return epicColor(epicColorMap[iss.key]??0);
+    if(iss.parentKey && epicColorMap[iss.parentKey]!==undefined) return epicColor(epicColorMap[iss.parentKey]);
+    if(iss.parentKey){
+      if(orphanParentColorMap[iss.parentKey]===undefined) orphanParentColorMap[iss.parentKey]=nextOrphanColor++%EPIC_COLORS.length;
+      return epicColor(orphanParentColorMap[iss.parentKey]);
+    }
+    const h=[...(iss.component||'x')].reduce((a,c)=>a+c.charCodeAt(0),0);
+    return epicColor(h%EPIC_COLORS.length);
+  }
+
+  // Build bar HTML and register positions
+  const barRegistry = {}; // key -> {leftPct, widthPct}
+
+  function makeBar(iss, isEpicRow=false){
+    const isEnablerBar = String(iss.storyType||'').toLowerCase().includes('enabler') || String(iss.type||'').toLowerCase().includes('enabler');
+
+    // ── Enabler bar date logic ──────────────────────────────────────────────
+    // Business rule: start = requiredByDate − 5 working days (always).
+    // End: requiredByDate normally; targetEndDate if requiredByDate already passed.
+    let sd, ed;
+    if(isEnablerBar){
+      const today0 = new Date(); today0.setHours(0,0,0,0);
+      const rbD = iss.requiredByDate ? parseDate(iss.requiredByDate) : null;
+      const rbPassed = rbD && rbD < today0;
+      // End date
+      if(rbPassed && iss.targetEndDate){
+        ed = iss.targetEndDate;
+      } else if(iss.requiredByDate){
+        ed = iss.requiredByDate;
+      } else {
+        ed = iss.targetEndDate || iss._derivedEnd || iss.dueDate;
+      }
+      // Start date: ALWAYS derive from requiredByDate − 5 working days.
+      // Fall back to stored startDate only when requiredByDate is absent.
+      if(rbD){
+        sd = subtractWorkingDays(rbD, 5).toISOString().slice(0,10);
+      } else {
+        sd = iss._derivedStart || iss.startDate;
+      }
+    } else {
+      sd = iss._derivedStart || iss.startDate;
+      ed = iss._derivedEnd || iss.dueDate;
+    }
+    const ganttTotalW2 = totalDays * PX_PER_DAY;
+    const bgCols2 = allDays.map(d=>`<div class="g-bg-month ${d.isToday?'current':d.dayOfWeek===0||d.dayOfWeek===6?'alt':''}" style="width:${PX_PER_DAY}px;flex-shrink:0"></div>`).join('');
+    if(!sd && !ed) return `<div class="g-bar-area" style="position:relative;width:${ganttTotalW2}px"><div class="g-bg-grid" style="width:${ganttTotalW2}px">${bgCols2}</div></div>`;
+
+    const startD = sd ? parseDate(sd) : parseDate(ed);
+    const endD = ed ? parseDate(ed) : parseDate(sd);
+    const dStart = Math.floor((startD - viewStart)/86400000);
+    // +1 so the bar spans through the end of the due date column (inclusive)
+    const duration = Math.max(1, Math.ceil((endD - startD)/86400000) + 1);
+
+    const leftPx = dStart * PX_PER_DAY;
+    const widthPx = duration * PX_PER_DAY;
+
+    const today2 = new Date(); today2.setHours(0,0,0,0);
+    const daysLeft = Math.floor((endD - today2)/86400000);
+    const isDone = (iss.status||'').toLowerCase().includes('done')||(iss.status||'').toLowerCase().includes('closed');
+    const reqByPassed = iss.requiredByDate && parseDate(iss.requiredByDate) < today2;
+    const isOverdue = (daysLeft < 0 || reqByPassed) && !isDone;
+    const isUrgent = !isOverdue && daysLeft >= 0 && daysLeft <= 7 && !isDone;
+
+    const col = getColor(iss, isEpicRow);
+    let barBg = col.bg;
+    let barBoxShadow = `0 2px 8px ${col.solid}55`;
+    if(isOverdue){
+      barBg = 'linear-gradient(90deg,#3b0000,#5c0a0a)';
+      barBoxShadow = '0 0 0 1px #7f1d1d, 0 2px 12px rgba(180,0,0,0.7), 0 0 20px rgba(220,0,0,0.35)';
+    } else if(isUrgent){ barBg = `linear-gradient(90deg,${col.solid},${col.solid}dd,#78350f)`; }
+
+    barRegistry[iss.key] = { leftPx, widthPx };
+
+    const todayOffsetPx = (Math.floor((today2 - viewStart)/86400000) * PX_PER_DAY).toFixed(0);
+    const todayLine2 = (parseFloat(todayOffsetPx)>=0&&parseFloat(todayOffsetPx)<=ganttTotalW2)?`<div class="today-line" style="left:${todayOffsetPx}px"><div class="today-label">Today</div></div>`:'';
+
+    const barHeight = isEpicRow ? '14px' : '24px';
+    const barStyle = `left:${leftPx}px;width:${Math.max(widthPx,4)}px;background:${barBg};height:${barHeight};${isDone?'opacity:0.5':''};box-shadow:${barBoxShadow}`;
+    const parentSummaryLabel = (() => {
+      if(isDone || widthPx <= 60) return '';
+      if(iss.type === 'Epic') return iss.key;
+      return iss.summary.slice(0, 35);
+    })();
+    const barLabel = parentSummaryLabel;
+
+    return `<div class="g-bar-area" style="position:relative;width:${ganttTotalW2}px;min-height:var(--row-h)">
+      <div class="g-bg-grid" style="width:${ganttTotalW2}px">${bgCols2}${todayLine2}</div>
+      <div class="g-bar ${isDone?'bar-done':''} ${isOverdue?'bar-overdue':''}" 
+        data-key="${iss.key}" data-start="${sd||''}" data-end="${ed||''}"
+        style="${barStyle}" onclick="barClick('${iss.key}',event)" title="${iss.key}: ${iss.summary}">${barLabel}</div>
+    </div>`;
+  }
+
+  function makeMetaCells(iss){
+    const sd = iss._derivedStart||iss.startDate;
+    const sc = getStatusClass(iss.status);
+
+    // Determine item category for conditional column display
+    const _stLower = String(iss.storyType||'').toLowerCase();
+    const _typLower = (iss.type||'').toLowerCase();
+    const isEnabler = _stLower.includes('enabler') || _typLower.includes('enabler');
+    const isStory   = !isEnabler && iss.type !== 'Epic';
+    const isEpic    = iss.type === 'Epic';
+
+    // N/A pill styling
+    const naHtml = `<span style="font-size:0.6rem;color:#94a3b8;font-style:italic;letter-spacing:0.3px">N/A</span>`;
+
+    // ── Start Date ──
+    // For Enablers: ALWAYS derive start = requiredByDate − 5 working days (business rule).
+    // Only fall back to stored startDate when requiredByDate is absent.
+    let effectiveSd;
+    if(isEnabler && iss.requiredByDate){
+      const rbD = parseDate(iss.requiredByDate);
+      if(rbD) effectiveSd = subtractWorkingDays(rbD, 5).toISOString().slice(0,10);
+    }
+    if(!effectiveSd) effectiveSd = sd; // non-enablers, or enablers without requiredByDate
+    const startVal = fmtShort(effectiveSd);
+    const startCell = ganttCols.start.collapsed
+      ? `<div class="gc-data-cell gc-start-cell" style="width:${colW('start')}px;min-width:${colW('start')}px;padding:0;justify-content:center"><span style="font-size:8px;opacity:0.4" title="${fmtShort(effectiveSd)}">…</span></div>`
+      : `<div class="gc-data-cell gc-start-cell" style="width:${colW('start')}px;min-width:${colW('start')}px">${startVal}</div>`;
+
+    // ── Due Date ──
+    // Stories & Epics show it; Enablers (SIT) show N/A
+    const dueDateColor = iss.dueDate ? (new Date(iss.dueDate) < new Date() ? '#dc2626' : '#0369a1') : '#94a3b8';
+    const dueVal = (!isEnabler || isEpic)
+      ? `<span style="color:${dueDateColor};font-weight:600">${fmtShort(iss.dueDate)}</span>`
+      : naHtml;
+    const dueCell = ganttCols.due?.collapsed
+      ? `<div class="gc-data-cell gc-due-cell" style="width:${colW('due')}px;min-width:${colW('due')}px;padding:0;justify-content:center"><span style="font-size:8px;opacity:0.4" title="${fmtShort(iss.dueDate)}">…</span></div>`
+      : `<div class="gc-data-cell gc-due-cell" style="width:${colW('due')}px;min-width:${colW('due')}px" title="Due Date">${dueVal}</div>`;
+
+    // ── Target End ──
+    // For Enablers: if requiredByDate is past, display targetEndDate in this
+    // column (highlighted amber) so the user sees the fallback date in use.
+    // For non-enablers: show targetEndDate as normal.
+    const today0 = new Date(); today0.setHours(0,0,0,0);
+    const rbD0 = isEnabler && iss.requiredByDate ? parseDate(iss.requiredByDate) : null;
+    const rbPassed0 = rbD0 && rbD0 < today0;
+    let targetEndDisplay, targetEndColor;
+    if(isEnabler && rbPassed0 && iss.targetEndDate){
+      // requiredByDate overdue → show targetEndDate as the active end date
+      targetEndDisplay = fmtShort(iss.targetEndDate);
+      targetEndColor = '#d97706'; // amber — signals the bar is now running to target
+    } else if(isEnabler){
+      // Normal enabler: required-by is the end; target end shown dimly as reference
+      targetEndDisplay = iss.targetEndDate ? fmtShort(iss.targetEndDate) : '—';
+      targetEndColor = getTargetEndColor(iss);
+    } else {
+      targetEndDisplay = iss.targetEndDate ? fmtShort(iss.targetEndDate) : '';
+      targetEndColor = getTargetEndColor(iss);
+    }
+    const targetCell = ganttCols.targetEnd.collapsed
+      ? `<div class="gc-data-cell gc-target-end-cell" style="width:${colW('targetEnd')}px;min-width:${colW('targetEnd')}px;padding:0;justify-content:center;background:#f0f9ff"><span style="font-size:8px;opacity:0.4" title="${targetEndDisplay}">…</span></div>`
+      : `<div class="gc-data-cell gc-target-end-cell" style="width:${colW('targetEnd')}px;min-width:${colW('targetEnd')}px;color:${targetEndColor};font-weight:600" title="${rbPassed0?'Required By passed — bar extended to Target End':'Target End'}">${targetEndDisplay}${rbPassed0&&iss.targetEndDate?'<span style="font-size:0.52rem;margin-left:3px;opacity:0.7">↑</span>':''}</div>`;
+
+    const statusCell = ganttCols.status.collapsed
+      ? `<div class="gc-data-cell gc-status-cell" style="width:${colW('status')}px;min-width:${colW('status')}px;padding:0;justify-content:center"><span style="font-size:8px;opacity:0.4" title="${iss.status}">…</span></div>`
+      : `<div class="gc-data-cell gc-status-cell" style="width:${colW('status')}px;min-width:${colW('status')}px"><span class="sbadge ${sc}" style="font-size:0.52rem">${iss.status}</span></div>`;
+
+    const assigneeCell = ganttCols.assignee.collapsed
+      ? `<div class="gc-data-cell gc-assignee-cell" style="width:${colW('assignee')}px;min-width:${colW('assignee')}px;padding:0;justify-content:center"><span style="font-size:8px;opacity:0.4" title="${iss.assignee||'—'}">…</span></div>`
+      : `<div class="gc-data-cell gc-assignee-cell" style="width:${colW('assignee')}px;min-width:${colW('assignee')}px">${iss.assignee||'—'}</div>`;
+
+    // ── Required By ──
+    // Enablers & Epics: always show (dash if missing); Stories: show N/A unless the field IS populated
+    const rbColor = iss.requiredByDate ? (new Date(iss.requiredByDate) < new Date() ? '#dc2626' : '#7c3aed') : '#94a3b8';
+    let rbVal;
+    if(isEnabler || isEpic){
+      const rbTxt = iss.requiredByDate ? fmtShort(iss.requiredByDate) : '—';
+      rbVal = `<span style="color:${rbColor}">${rbTxt}</span>`;
+    } else if(iss.requiredByDate){
+      // Story but has a required-by date — show it
+      rbVal = `<span style="color:${rbColor}">${fmtShort(iss.requiredByDate)}</span>`;
+    } else {
+      rbVal = naHtml;
+    }
+    const requiredByCell = ganttCols.requiredBy.collapsed
+      ? `<div class="gc-data-cell gc-reqby-cell" style="width:${colW('requiredBy')}px;min-width:${colW('requiredBy')}px;padding:0;justify-content:center"><span style="font-size:8px;opacity:0.4" title="${fmtShort(iss.requiredByDate)}">…</span></div>`
+      : `<div class="gc-data-cell gc-reqby-cell" style="width:${colW('requiredBy')}px;min-width:${colW('requiredBy')}px" title="Required By Date">${rbVal}</div>`;
+
+    return startCell + dueCell + targetCell + requiredByCell + assigneeCell + statusCell;
+  }
+
+  // ── BUILD DAY CELLS ──
+  // Group days by month for month-band header
+  const dayBands = []; // {monthLabel, dStart, daysCount, isCurrent}
+  const allDays = []; // {dayNum, dayOfWeek, isToday, isCurrent, dOffset}
+  for(let d=0; d<totalDays; d++){
+    const dt = new Date(viewStart.getTime() + d*86400000);
+    const isToday2 = dt.getTime() === today.getTime();
+    const isCurMon = dt.getMonth()===today.getMonth() && dt.getFullYear()===today.getFullYear();
+    const dow = dt.getDay(); // 0=Sun,6=Sat
+    allDays.push({dayNum:dt.getDate(), dayOfWeek:dow, isToday:isToday2, isCurrent:isCurMon, dOffset:d, date:dt});
+  }
+  // Build month bands
+  const mb = [];
+  let mCur = null;
+  allDays.forEach((dd,i)=>{
+    const ml = dd.date.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+    if(!mCur || mCur.label!==ml){
+      mCur = {label:ml, dStart:dd.dOffset, daysCount:1, isCurrent:dd.isCurrent};
+      mb.push(mCur);
+    } else { mCur.daysCount++; }
+  });
+
+  const PX_PER_DAY = Math.round(Math.max(18, Math.min(38, Math.floor(900/totalDays))) * zoomLevel);
+
+  function sortIcon(col){
+    if(sortCol!==col) return '<span class="sort-icon">⇅</span>';
+    return `<span class="sort-icon">${sortDir==='asc'?'↑':'↓'}</span>`;
+  }
+  function sortClass(col){ return sortCol===col?'sort-active':''; }
+
+  // ── Collapsed column widths ──
+  function colW(name){ return ganttCols[name].collapsed ? 22 : ganttCols[name].w; }
+  function colToggleBtn(name){
+    return '<span onclick="event.stopPropagation();toggleGanttCol(\'' + name + '\')" title="Collapse column"'
+      + ' style="margin-left:auto;cursor:pointer;font-size:9px;opacity:0.6;padding:1px 3px;border-radius:3px;background:rgba(0,0,0,0.06);flex-shrink:0;line-height:1">&#9664;</span>';
+  }
+
+  // ── HEADER ──
+  // Pre-compute per-column header content to avoid escaped-quote issues in template literals
+  function colHdr(name, sortKey, label){
+    const c = ganttCols[name];
+    const w = colW(name);
+    const collapsedStyle = c.collapsed ? 'padding:0 4px;justify-content:center' : '';
+    const bg = name === 'targetEnd' ? 'background:#f0f9ff;' : name === 'requiredBy' ? 'background:#faf5ff;' : '';
+    const oc = c.collapsed ? '' : 'onclick="setSort(\'' + sortKey + '\')"';
+    const inner = c.collapsed
+      ? '<span onclick="event.stopPropagation();toggleGanttCol(\'' + name + '\')" title="Expand ' + label + ' column" style="cursor:pointer;font-size:9px;opacity:0.7">&#9654;</span>'
+      : label + ' ' + sortIcon(sortKey) + ' ' + colToggleBtn(name);
+    const sortCls = (!c.collapsed && sortCol === sortKey) ? 'sort-active' : '';
+    return '<div class="gc-' + (name==='targetEnd'?'target':name==='assignee'?'assignee':name==='requiredBy'?'reqby':name) + ' ' + sortCls + '" ' + oc
+      + ' style="width:' + w + 'px;min-width:' + w + 'px;overflow:hidden;' + bg + collapsedStyle + '">'
+      + inner + '</div>';
+  }
+
+  const hdrLeft = '<div class="g-left">'
+    + '<div class="gc-issue ' + sortClass('summary') + '" onclick="setSort(\'summary\')" title="Sort A\u2013Z by Issue/Summary" style="width:var(--left-panel-w);min-width:var(--left-panel-w)">Issue / Summary ' + sortIcon('summary') + '</div>'
+    + colHdr('start',      'start',      'Start date')
+    + colHdr('due',        'due',        'Due Date')
+    + colHdr('targetEnd',  'targetEnd',  'Target End')
+    + colHdr('requiredBy', 'requiredBy', 'Req. By Date')
+    + colHdr('assignee',   'assignee',   'Assignee')
+    + colHdr('status',     'status',     'Status')
+    + '</div>';
+
+  // Build day-level header: top half = month bands, bottom half = day numbers
+  const monthBandHtml = mb.map(m=>`<div class="g-month-band ${m.isCurrent?'current-month':''}" style="left:${m.dStart*PX_PER_DAY}px;width:${m.daysCount*PX_PER_DAY}px">${m.label}</div>`).join('');
+  const dayNumHtml = allDays.map(d=>{
+    const cls = d.isToday?'today-day':d.dayOfWeek===0||d.dayOfWeek===6?'weekend':'';
+    return `<div class="g-day-cell ${cls}" style="left:${d.dOffset*PX_PER_DAY}px;width:${PX_PER_DAY}px" title="${d.date.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}">${d.dayNum}</div>`;
+  }).join('');
+  const ganttTotalW = totalDays * PX_PER_DAY;
+  const leftPanelTotalW = 280 + colW('start') + colW('due') + colW('targetEnd') + colW('requiredBy') + colW('assignee') + colW('status');
+  const headerHtml = `<div class="gantt-header-row" style="height:var(--hdr-h);width:${ganttTotalW + leftPanelTotalW}px">
+    ${hdrLeft}
+    <div class="g-months" style="width:${ganttTotalW}px;position:relative">${monthBandHtml}${dayNumHtml}</div>
+  </div>`;
+
+  // ── ROWS ──
+  let rowsHtml = '';
+
+  // Epics + their children
+  epics.forEach((epic,ei)=>{
+    const epicId = 'ep_'+epic.key.replace(/[^a-z0-9]/gi,'_');
+    const col = epicColor(epicColorMap[epic.key]??0);
+    rowsHtml += `<div class="g-row epic-row" onclick="toggleEpic('${epicId}')" id="erow_${epicId}" style="border-left:3px solid ${col.solid}">
+      <div class="g-left-cells">
+        <div class="gc-issue-cell" style="padding-left:8px">
+          <span class="epic-toggle open" id="tog_${epicId}">▶</span>
+          <div class="cell-key-wrap">
+            <div class="cell-key epic-key">⚡ ${epic.key}</div>
+            <div class="cell-summary" title="${epic.summary}">${epic.summary}</div>
+          </div>
+        </div>
+        ${makeMetaCells(epic)}
+      </div>
+      ${makeBar(epic, true)}
+    </div>`;
+
+    // Split children into Dev Workitems (non-Enabler) and SIT Workitems (Enabler)
+    const epicChildren = epicMap[epic.key]||[];
+    const devItems = epicChildren.filter(i => !String(i.storyType||'').toLowerCase().includes('enabler') && !String(i.type||'').toLowerCase().includes('enabler'));
+    const sitItems = epicChildren.filter(i => String(i.storyType||'').toLowerCase().includes('enabler') || String(i.type||'').toLowerCase().includes('enabler'));
+
+    function renderSubgroupHeader(label, count, subId, colorSolid, icon, bgColor, textColor){
+      const subToggleId = 'subtog_' + subId;
+      const subGroupId  = 'subgrp_' + subId;
+      return `<div class="g-row" id="sghdr_${subId}" data-epic="${epicId}"
+        style="background:${bgColor};border-left:3px solid ${colorSolid};min-height:26px;cursor:pointer"
+        onclick="toggleSubgroup('${subGroupId}','${subToggleId}')">
+        <div class="g-left-cells" style="background:${bgColor}">
+          <div class="gc-issue-cell" style="padding-left:28px;min-height:26px;background:${bgColor}">
+            <span class="epic-toggle open" id="${subToggleId}" style="font-size:9px;color:${textColor}">▶</span>
+            <span style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:${textColor};white-space:nowrap">${icon} ${label}</span>
+            <span style="font-size:0.58rem;color:${textColor};opacity:0.7;margin-left:4px;font-family:var(--mono)">(${count})</span>
+          </div>
+          <div class="gc-data-cell gc-start-cell" style="width:${colW('start')}px;min-width:${colW('start')}px;background:${bgColor}"></div>
+          <div class="gc-data-cell gc-due-cell" style="width:${colW('due')}px;min-width:${colW('due')}px;background:${bgColor}"></div>
+          <div class="gc-data-cell gc-target-end-cell" style="width:${colW('targetEnd')}px;min-width:${colW('targetEnd')}px;background:${bgColor}"></div>
+          <div class="gc-data-cell gc-reqby-cell" style="width:${colW('requiredBy')}px;min-width:${colW('requiredBy')}px;background:${bgColor}"></div>
+          <div class="gc-data-cell gc-assignee-cell" style="width:${colW('assignee')}px;min-width:${colW('assignee')}px;background:${bgColor}"></div>
+          <div class="gc-data-cell gc-status-cell" style="width:${colW('status')}px;min-width:${colW('status')}px;background:${bgColor}"></div>
+        </div>
+        <div class="g-bar-area" style="position:relative;width:${totalDays*PX_PER_DAY}px;min-height:26px;background:${bgColor}">
+          <div class="g-bg-grid" style="width:${totalDays*PX_PER_DAY}px">${allDays.map(d=>`<div class="g-bg-month" style="width:${PX_PER_DAY}px;flex-shrink:0;background:${bgColor}"></div>`).join('')}</div>
+        </div>
+      </div>`;
+    }
+
+    function renderChildRow(iss, subGroupId){
+      const sel = selectedIssue?.key===iss.key;
+      const parentSummaryShort = epic.summary.length > 28 ? epic.summary.slice(0,27)+'…' : epic.summary;
+      const isEnabler = String(iss.storyType||'').toLowerCase().includes('enabler') || String(iss.type||'').toLowerCase().includes('enabler');
+      const typeBadge = isEnabler
+        ? `<span style="font-size:0.5rem;padding:1px 5px;border-radius:3px;background:#f3e8ff;color:#7c3aed;font-weight:700;width:fit-content;margin-top:2px">SIT</span>`
+        : `<span style="font-size:0.5rem;padding:1px 5px;border-radius:3px;background:#eff6ff;color:#0369a1;font-weight:700;width:fit-content;margin-top:2px">DEV</span>`;
+      return `<div class="g-row story-row ${sel?'selected':''}" id="row_${iss.key}" data-epic="${epicId}" data-subgroup="${subGroupId}" style="border-left:3px solid ${col.solid}55">
+        <div class="g-left-cells">
+          <div class="gc-issue-cell story-indent" onclick="openIssueDetail('${iss.key}')">
+            <div class="cell-key-wrap">
+              <div style="display:flex;align-items:center;gap:4px">
+                <div class="cell-key">${iss.key}</div>${typeBadge}
+              </div>
+              <div class="cell-summary" title="${iss.summary}">${iss.summary}</div>
+              <div style="font-size:0.56rem;color:${col.solid};margin-top:2px;opacity:0.8;display:flex;align-items:center;gap:3px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis" title="Parent: ${epic.key} — ${epic.summary}">
+                <span style="font-family:var(--mono)">⚡${epic.key}</span><span style="opacity:0.6">·</span><span style="overflow:hidden;text-overflow:ellipsis">${parentSummaryShort}</span>
+              </div>
+            </div>
+          </div>
+          ${makeMetaCells(iss)}
+        </div>
+        ${makeBar(iss)}
+      </div>`;
+    }
+
+    // ── Dev Workitems subgroup ──
+    if(devItems.length){
+      const devSubId = epicId + '_dev';
+      rowsHtml += renderSubgroupHeader('Dev Workitems', devItems.length, devSubId, col.solid, '🛠', 'rgba(239,246,255,0.85)', '#0369a1');
+      devItems.forEach(iss => { rowsHtml += renderChildRow(iss, 'subgrp_'+devSubId); });
+    }
+
+    // ── SIT Workitems subgroup ──
+    if(sitItems.length){
+      const sitSubId = epicId + '_sit';
+      rowsHtml += renderSubgroupHeader('SIT Workitems', sitItems.length, sitSubId, '#7c3aed', '🧪', 'rgba(245,243,255,0.9)', '#6d28d9');
+      sitItems.forEach(iss => { rowsHtml += renderChildRow(iss, 'subgrp_'+sitSubId); });
+    }
+  });
+
+  // Orphan stories (grouped by parent key or component)
+  if(orphans.length){
+    const groups = {};
+    orphans.forEach(i=>{
+      const key = i.parentKey || i.component || 'General';
+      if(!groups[key]) groups[key]=[];
+      groups[key].push(i);
+    });
+    let gi = epics.length;
+    Object.keys(groups).forEach(gk=>{
+      const col = epicColor(gi++);
+      rowsHtml += `<div class="g-row" style="background:rgba(2,132,199,0.05);border-left:3px solid ${col.solid};min-height:30px">
+        <div class="g-left-cells">
+          <div class="gc-issue-cell" style="font-size:0.65rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px">
+            🗂 ${gk} <span style="font-weight:400;opacity:0.6">(${groups[gk].length})</span>
+          </div>
+          <div class="gc-data-cell gc-start-cell"></div>
+          <div class="gc-data-cell gc-due-cell"></div>
+          <div class="gc-data-cell gc-target-end-cell"></div>
+          <div class="gc-data-cell gc-status-cell"></div>
+          <div class="gc-data-cell gc-assignee-cell"></div>
+          <div class="gc-data-cell gc-reqby-cell"></div>
+        </div>
+          <div class="g-bar-area" style="width:${totalDays*PX_PER_DAY}px;position:relative">
+          <div class="g-bg-grid" style="width:${totalDays*PX_PER_DAY}px">${allDays.map(d=>`<div class="g-bg-month ${d.isToday?'current':d.dayOfWeek===0||d.dayOfWeek===6?'alt':''}" style="width:${PX_PER_DAY}px;flex-shrink:0"></div>`).join('')}</div>
+        </div>
+      </div>`;
+      groups[gk].forEach(iss=>{
+        const sel = selectedIssue?.key===iss.key;
+        const orphanParent = iss.parentKey ? `<div style="font-size:0.56rem;color:var(--accent);margin-top:2px;opacity:0.75;font-family:var(--mono)" title="Parent: ${iss.parentKey}">⚡${iss.parentKey}</div>` : '';
+        rowsHtml+=`<div class="g-row story-row ${sel?'selected':''}" id="row_${iss.key}" style="border-left:3px solid ${col.solid}33">
+          <div class="g-left-cells">
+            <div class="gc-issue-cell story-indent" onclick="openIssueDetail('${iss.key}')">
+              <div class="cell-key-wrap">
+                <div class="cell-key">${iss.key}</div>
+                <div class="cell-summary" title="${iss.summary}">${iss.summary}</div>
+                ${orphanParent}
+              </div>
+            </div>
+            ${makeMetaCells(iss)}
+          </div>
+          ${makeBar(iss)}
+        </div>`;
+      });
+    });
+  }
+
+  cont.innerHTML = headerHtml + `<div class="gantt-inner">${rowsHtml}</div>`;
+
+  // Re-render epic tree for dev tab
+  renderEpicTree(null);
+
+  // ── Epic color legend ──
+  const leg = document.getElementById('epicLegend');
+  if(epics.length){
+    leg.style.display='flex';
+    leg.innerHTML = `<span style="font-size:0.6rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;white-space:nowrap;margin-right:6px">🎨 Epics:</span>` +
+      epics.map(e=>{
+        const col = epicColor(epicColorMap[e.key]??0);
+        return `<div class="legend-item"><div class="legend-swatch" style="background:${col.bg}"></div>${e.key}: ${e.summary.length>20?e.summary.slice(0,20)+'…':e.summary}</div>`;
+      }).join('');
+  } else {
+    leg.style.display='none';
+  }
+
+  // ── Dependency arrows (SVG overlay) ──
+  if(showDeps){
+    setTimeout(()=>{
+      const inner = cont.querySelector('.gantt-inner');
+      if(!inner) return;
+      const contRect = cont.getBoundingClientRect();
+      const innerRect = inner.getBoundingClientRect();
+
+      const barPixels = {};
+      inner.querySelectorAll('.g-bar[data-key]').forEach(el=>{
+        const key = el.dataset.key;
+        const r = el.getBoundingClientRect();
+        const rowEl = el.closest('.g-row');
+        let rowMid = r.top + r.height/2 - contRect.top + cont.scrollTop;
+        barPixels[key] = {
+          xStart: r.left - contRect.left + cont.scrollLeft,
+          xEnd: r.right - contRect.left + cont.scrollLeft,
+          yMid: rowMid
+        };
+      });
+
+      const links = [];
+      filteredIssues.forEach(i=>{
+        if(i.parentKey && barPixels[i.parentKey] && barPixels[i.key]){
+          links.push({from:i.parentKey,to:i.key,color:'rgba(2,132,199,0.45)',custom:false});
+        }
+      });
+      customDeps.forEach(d=>{
+        if(barPixels[d.from]&&barPixels[d.to]){
+          links.push({from:d.from,to:d.to,color:'rgba(220,38,38,0.85)',custom:true});
+        }
+      });
+      if(!links.length) return;
+
+      const svgH = inner.scrollHeight + 100;
+      const svgW = inner.scrollWidth;
+      const paths = links.map(lnk=>{
+        const f=barPixels[lnk.from], t=barPixels[lnk.to];
+        if(!f||!t) return '';
+        const x1=f.xEnd,y1=f.yMid,x2=t.xStart,y2=t.yMid;
+        const path=`M ${x1},${y1} C ${x1+30},${y1} ${x2-30},${y2} ${x2},${y2}`;
+        const ctx = lnk.custom
+          ? `oncontextmenu="event.preventDefault();deleteDepLink('${lnk.from}','${lnk.to}')" style="cursor:pointer;pointer-events:stroke"`
+          : `style="pointer-events:none"`;
+        return `<path d="${path}" stroke="${lnk.color}" stroke-width="${lnk.custom?3:1.8}"
+          fill="none" stroke-dasharray="${lnk.custom?'':'7,4'}"
+          marker-end="url(#arr-${lnk.custom?'red':'blue'})"
+          ${ctx}><title>${lnk.from} → ${lnk.to}${lnk.custom?' (right-click to remove)':''}</title></path>`;
+      }).join('');
+      const svg=`<svg style="position:absolute;top:0;left:0;width:${svgW}px;height:${svgH}px;pointer-events:none;z-index:6;overflow:visible" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="rgba(2,132,199,0.7)"/></marker>
+          <marker id="arr-red" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="rgba(220,38,38,0.9)"/></marker>
+        </defs>
+        <g style="pointer-events:all">${paths}</g>
+      </svg>`;
+      inner.insertAdjacentHTML('beforeend', svg);
+    }, 80);
+  }
+
+  // Update h-scroll
+  setTimeout(()=>{
+    const scroll = document.getElementById('ganttScroll');
+    const hrange = document.getElementById('hscroll');
+    if(scroll && hrange){
+      hrange.max = Math.max(0, scroll.scrollWidth - scroll.clientWidth);
+      hrange.value = scroll.scrollLeft;
+    }
+  }, 60);
+}
+
+function toggleEpic(epicId){
+  const tog = document.getElementById('tog_'+epicId);
+  const rows = document.querySelectorAll(`[data-epic="${epicId}"]`);
+  const isOpen = tog.classList.contains('open');
+  if(isOpen){ tog.classList.remove('open'); rows.forEach(r=>r.classList.add('hidden')); }
+  else { tog.classList.add('open'); rows.forEach(r=>r.classList.remove('hidden')); }
+}
+
+function toggleSubgroup(subGroupId, subToggleId){
+  const tog = document.getElementById(subToggleId);
+  const rows = document.querySelectorAll(`[data-subgroup="${subGroupId}"]`);
+  const isOpen = tog.classList.contains('open');
+  if(isOpen){ tog.classList.remove('open'); rows.forEach(r=>r.classList.add('hidden')); }
+  else { tog.classList.add('open'); rows.forEach(r=>r.classList.remove('hidden')); }
+}
+
+// ══ ZOOM (DEV TAB) ══
+function zoomGantt(dir){
+  zoomIdx = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, zoomIdx + dir));
+  zoomLevel = ZOOM_LEVELS[zoomIdx];
+  const lbl = document.getElementById('zoomLabel');
+  if(lbl) lbl.textContent = zoomLevel < 1 ? (zoomLevel * 100).toFixed(0) + '%' : zoomLevel + '×';
+  renderGantt();
+}
+function zoomReset(){
+  zoomIdx = 3;
+  zoomLevel = ZOOM_LEVELS[3]; // 1
+  const lbl = document.getElementById('zoomLabel');
+  if(lbl) lbl.textContent = '1×';
+  renderGantt();
+}
+
+// ══ EPIC TREE SIDEBAR ══
+function toggleEpicTree(){
+  const body = document.getElementById('epicTreeBody');
+  const tog  = document.getElementById('epicTreeToggle');
+  if(!body) return;
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  if(tog) tog.classList.toggle('open', !isOpen);
+}
+
+function renderEpicTree(tab){
+  const body = document.getElementById('epicTreeBody');
+  if(!body) return;
+
+  // Use filteredIssues for the dev tab (tab === null), tabState for others
+  const src = (tab && tabState[tab]) ? tabState[tab].filteredIssues : filteredIssues;
+
+  if(!src || !src.length){
+    body.innerHTML = '<div style="text-align:center;padding:10px;font-size:0.68rem;color:rgba(255,255,255,0.35)">No epics loaded</div>';
+    return;
+  }
+
+  const epics   = src.filter(i => i.type === 'Epic');
+  const stories = src.filter(i => i.type !== 'Epic');
+
+  if(!epics.length){
+    body.innerHTML = '<div style="text-align:center;padding:10px;font-size:0.68rem;color:rgba(255,255,255,0.35)">No epics in current filter</div>';
+    return;
+  }
+
+  const colorMap = {};
+  epics.forEach((e, i) => { colorMap[e.key] = i; });
+
+  const childMap = {};
+  epics.forEach(e => { childMap[e.key] = []; });
+  stories.forEach(s => {
+    if(s.parentKey && childMap[s.parentKey] !== undefined) childMap[s.parentKey].push(s);
+  });
+
+  body.innerHTML = epics.map(epic => {
+    const col   = epicColor(colorMap[epic.key] ?? 0);
+    const kids  = childMap[epic.key] || [];
+    const etId  = 'et_' + epic.key.replace(/[^a-z0-9]/gi, '_');
+
+    const childHtml = kids.length ? kids.map(s =>
+      `<div class="et-story-item" onclick="openIssueDetail('${s.key}')">
+        <div class="et-story-dot"></div>
+        <span class="et-story-key">${s.key}</span>
+        <span class="et-story-sum" title="${s.summary}">${s.summary}</span>
+      </div>`
+    ).join('') : '<div style="padding:3px 6px;font-size:0.6rem;color:rgba(255,255,255,0.3)">No stories</div>';
+
+    return `<div class="et-epic-item">
+      <div class="et-epic-row" onclick="(function(){
+        var f=document.getElementById('${etId}_full');
+        var t=document.getElementById('${etId}_tog');
+        if(f){f.classList.toggle('open');if(t)t.classList.toggle('open');}
+      })()">
+        <span class="et-epic-toggle open" id="${etId}_tog">▶</span>
+        <div class="et-epic-dot" style="background:${col.solid}"></div>
+        <span class="et-epic-key">${epic.key}</span>
+        <span class="et-epic-summary" title="${epic.summary}">${epic.summary}</span>
+      </div>
+      <div class="et-epic-full open et-children" id="${etId}_full">
+        ${childHtml}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══ SORT ══
+function setSort(col){
+  if(sortCol===col){ sortDir = sortDir==='asc'?'desc':'asc'; }
+  else { sortCol=col; sortDir='asc'; }
+  renderGantt();
+}
+
+// ══ COLLAPSIBLE GANTT COLUMNS ══
+function toggleGanttCol(name){
+  if(!ganttCols[name]) return;
+  ganttCols[name].collapsed = !ganttCols[name].collapsed;
+  renderGantt();
+  showToast(`${ganttCols[name].collapsed ? '◀ Collapsed' : '▶ Expanded'}: ${ganttCols[name].label}`,'info');
+}
+
+// ══ ISSUE DETAIL MODAL ══
+function openIssueDetail(key){
+  const iss = issues.find(i=>i.key===key);
+  if(!iss) return;
+  selectedIssue = iss;
+  document.getElementById('m-key').textContent = iss.key;
+  document.getElementById('m-title').textContent = iss.summary;
+  document.getElementById('m-status').innerHTML = `<span class="sbadge ${getStatusClass(iss.status)}">${iss.status}</span>`;
+  document.getElementById('m-priority').textContent = iss.priority||'—';
+  document.getElementById('m-assignee').textContent = iss.assignee||'Unassigned';
+  document.getElementById('m-type').textContent = iss.type||'—';
+  document.getElementById('m-start').textContent = fmtDate(iss.startDate);
+  document.getElementById('m-due').textContent = fmtDate(iss.dueDate);
+  document.getElementById('openJiraBtn').style.display = iss.url?'flex':'none';
+  const pe = document.getElementById('m-parent');
+  if(iss.parentKey){
+    const par = issues.find(i=>i.key===iss.parentKey);
+    pe.textContent = par ? `⚡ ${par.key} — ${par.summary}` : `⚡ ${iss.parentKey}`;
+  } else {
+    pe.textContent = iss.type==='Epic'?'(Top-level Epic)':'— No parent';
+  }
+  document.getElementById('m-comments').innerHTML = '<div style="text-align:center;padding:14px;color:var(--text3);font-size:0.72rem">⏳ Loading comments…</div>';
+  fetchComments(key);
+  document.getElementById('issueModal').classList.add('open');
+  renderIssueList();
+}
+
+async function fetchComments(key){
+  const box = document.getElementById('m-comments');
+  if(!jiraConfig.proxyUrl || !jiraConfig.url){
+    // Demo comments
+    const demo = [
+      {author:'Priya S.', created:'May 1, 2026 09:14', body:'Reviewed the implementation. Looks good — need to handle edge case for token expiry.'},
+      {author:'Rahul M.', created:'May 2, 2026 14:32', body:'Added unit tests for the endpoint. Can you review?'},
+    ];
+    box.innerHTML = demo.slice().reverse().map(c=>commentHtml(c)).join('');
+    return;
+  }
+  try {
+    const cfg = jiraConfig;
+    const auth = btoa(`${cfg.email}:${cfg.token||''}`);
+    const raw = await fetchJiraComments(key, cfg, auth);
+    const comments = raw.map(c=>({
+      author:c.author?.displayName||'Unknown',
+      created:new Date(c.created).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}),
+      body:extractDesc(c.body)
+    })).reverse(); // latest comment first
+    box.innerHTML = comments.length ? comments.map(c=>commentHtml(c)).join('') :
+      '<div style="text-align:center;padding:14px;color:var(--text3);font-size:0.72rem">No comments.</div>';
+  } catch(e){
+    box.innerHTML = `<div style="text-align:center;padding:14px;color:var(--text3);font-size:0.72rem">Could not load comments: ${e.message}</div>`;
+  }
+}
+
+// ── Core comment fetcher: tries proxy /jira with apiPath, then direct Jira API ──
+async function fetchJiraComments(key, cfg, auth){
+  const c = cfg || jiraConfig;
+  const commentsPath = `/rest/api/3/issue/${key}/comment?maxResults=50&orderBy=created`;
+
+  // Strategy 1: proxy /jira?apiPath=... (passes arbitrary Jira API path through worker)
+  if(c.proxyUrl){
+    try {
+      const p = new URLSearchParams({jiraBase:c.url, auth, apiPath: commentsPath});
+      const r = await fetch(`${c.proxyUrl}/jira?${p}`, {signal:AbortSignal.timeout(12000)});
+      if(r.ok){
+        const data = await r.json();
+        if(data.comments !== undefined) return data.comments||[];
+        // Some proxies return the raw array
+        if(Array.isArray(data)) return data;
+      }
+    } catch(e){ /* fall through */ }
+
+    // Strategy 2: proxy /jira/comments (legacy endpoint some workers have)
+    try {
+      const p2 = new URLSearchParams({jiraBase:c.url, auth, issueKey:key});
+      const r2 = await fetch(`${c.proxyUrl}/jira/comments?${p2}`, {signal:AbortSignal.timeout(12000)});
+      if(r2.ok){
+        const data2 = await r2.json();
+        if(data2.comments !== undefined) return data2.comments||[];
+        if(Array.isArray(data2)) return data2;
+      }
+    } catch(e){ /* fall through */ }
+  }
+
+  // Strategy 3: direct Jira Cloud API (works if Atlassian allows CORS from browser)
+  try {
+    const directUrl = `${c.url}${commentsPath}`;
+    const r3 = await fetch(directUrl, {
+      headers:{ 'Authorization':'Basic '+auth, 'Content-Type':'application/json', 'Accept':'application/json' },
+      signal:AbortSignal.timeout(12000)
+    });
+    if(r3.ok){
+      const data3 = await r3.json();
+      return data3.comments||[];
+    }
+    throw new Error(`HTTP ${r3.status}`);
+  } catch(e){
+    throw new Error('Comments unavailable — proxy needs apiPath support or direct CORS access. ' + e.message);
+  }
+}
+function commentHtml(c){
+  return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+      <span style="font-size:0.68rem;font-weight:600;color:var(--accent)">${c.author}</span>
+      <span style="font-size:0.61rem;color:var(--text3)">${c.created}</span>
+    </div>
+    <div style="font-size:0.74rem;color:var(--text);line-height:1.5">${c.body}</div>
+  </div>`;
+}
+
+// ── Post a new comment to Jira ──
+async function postCommentToJira(){
+  const iss = selectedIssue;
+  if(!iss){ showToast('No issue selected','error'); return; }
+  const text = document.getElementById('newCommentText').value.trim();
+  if(!text){ showToast('Please type a comment first','error'); return; }
+
+  const btn  = document.getElementById('postCommentBtn');
+  const icon = document.getElementById('postCommentIcon');
+  const statusEl = document.getElementById('commentPostStatus');
+
+  btn.disabled = true; icon.textContent = '⏳'; statusEl.textContent = 'Posting…';
+
+  const cfg = jiraConfig;
+  const commentPath = `/rest/api/3/issue/${iss.key}/comment`;
+
+  // Jira Cloud API 3 uses Atlassian Document Format for body
+  const adfBody = {
+    version: 1,
+    type: 'doc',
+    content: [{ type: 'paragraph', content: [{ type: 'text', text }] }]
+  };
+  const payload = JSON.stringify({ body: adfBody });
+
+  // Demo mode
+  if(!cfg.url || !cfg.email || !cfg.token){
+    setTimeout(()=>{
+      const now = new Date();
+      const fakeComment = {
+        author: cfg.email || 'You',
+        created: now.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}),
+        body: text
+      };
+      const box = document.getElementById('m-comments');
+      box.insertAdjacentHTML('afterbegin', commentHtml(fakeComment));
+      box.scrollTop = 0;
+      document.getElementById('newCommentText').value = '';
+      btn.disabled = false; icon.textContent = '📤'; statusEl.textContent = '✅ Posted (demo mode)';
+      setTimeout(()=>{ statusEl.textContent=''; }, 4000);
+    }, 600);
+    return;
+  }
+
+  const auth = btoa(`${cfg.email}:${cfg.token}`);
+  const jiraHeaders = { 'Authorization': 'Basic ' + auth, 'Content-Type': 'application/json', 'Accept': 'application/json' };
+
+  // ── Strategy 1: proxy /jira/comment  (dedicated POST-aware endpoint) ──
+  // Worker route:
+  //   if (url.pathname === '/jira/comment') {
+  //     const { jiraBase, auth, issueKey, body } = await request.json();
+  //     const r = await fetch(`${jiraBase}/rest/api/3/issue/${issueKey}/comment`, {
+  //       method: 'POST',
+  //       headers: { 'Authorization': 'Basic ' + auth, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+  //       body: JSON.stringify(body)
+  //     });
+  //     return new Response(await r.text(), { status: r.status, headers: corsHeaders });
+  //   }
+  let posted = false;
+  let lastErr = '';
+  if(cfg.proxyUrl){
+    try {
+      const r = await fetch(`${cfg.proxyUrl}/jira/comment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jiraBase: cfg.url, auth, issueKey: iss.key, body: { body: JSON.parse(payload).body } }),
+        signal: AbortSignal.timeout(14000)
+      });
+      if(r.ok || r.status === 201){ posted = true; }
+      else {
+        const t = await r.text().catch(()=>'');
+        lastErr = `Proxy /jira/comment: HTTP ${r.status} ${t.slice(0,80)}`;
+      }
+    } catch(e){ lastErr = 'Proxy /jira/comment: ' + e.message; }
+  }
+
+  // ── Strategy 2: proxy generic /proxy-post ──
+  if(!posted && cfg.proxyUrl){
+    try {
+      const r2 = await fetch(`${cfg.proxyUrl}/proxy-post`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetUrl: `${cfg.url}${commentPath}`,
+          headers: jiraHeaders,
+          body: JSON.parse(payload)
+        }),
+        signal: AbortSignal.timeout(14000)
+      });
+      if(r2.ok || r2.status === 201){ posted = true; }
+      else {
+        const t2 = await r2.text().catch(()=>'');
+        lastErr = `Proxy /proxy-post: HTTP ${r2.status} ${t2.slice(0,80)}`;
+      }
+    } catch(e2){ lastErr = 'Proxy /proxy-post: ' + e2.message; }
+  }
+
+  // ── Strategy 3: direct Jira Cloud API (works if Atlassian allows CORS) ──
+  if(!posted){
+    try {
+      const r3 = await fetch(`${cfg.url}${commentPath}`, {
+        method: 'POST',
+        headers: jiraHeaders,
+        body: payload,
+        signal: AbortSignal.timeout(14000)
+      });
+      if(r3.ok || r3.status === 201){ posted = true; }
+      else {
+        const errBody = await r3.text().catch(()=>'');
+        lastErr = `Direct API: HTTP ${r3.status} — ${errBody.slice(0,120)}`;
+        throw new Error(lastErr);
+      }
+    } catch(e3){
+      btn.disabled = false; icon.textContent = '📤';
+      const msg = lastErr || e3.message;
+      statusEl.innerHTML = `❌ Failed: ${msg}<br><span style="font-size:0.6rem;color:#b45309">💡 Add <code>/jira/comment</code> route to your Cloudflare Worker (see console for snippet)</span>`;
+      console.error('postCommentToJira failed.\nAdd this to your Cloudflare Worker:\n\nif (url.pathname === \'/jira/comment\') {\n  const { jiraBase, auth, issueKey, body } = await request.json();\n  const r = await fetch(`${jiraBase}/rest/api/3/issue/${issueKey}/comment`, {\n    method: \'POST\',\n    headers: { \'Authorization\': \'Basic \' + auth, \'Content-Type\': \'application/json\', \'Accept\': \'application/json\' },\n    body: JSON.stringify(body)\n  });\n  return new Response(await r.text(), { status: r.status, headers: corsHeaders });\n}');
+      showToast('❌ Could not post comment — see details below', 'error');
+      return;
+    }
+  }
+
+  if(posted){
+    const now = new Date();
+    const newComment = {
+      author: cfg.email,
+      created: now.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}),
+      body: text
+    };
+    const box = document.getElementById('m-comments');
+    box.insertAdjacentHTML('afterbegin', commentHtml(newComment));
+    box.scrollTop = 0;
+    document.getElementById('newCommentText').value = '';
+    statusEl.textContent = '✅ Comment posted to Jira!';
+    showToast('✅ Comment posted to ' + iss.key, 'success');
+    setTimeout(()=>{ statusEl.textContent=''; }, 5000);
+  }
+  btn.disabled = false; icon.textContent = '📤';
+}
+
+function openInJira(){
+  if(selectedIssue?.url) window.open(selectedIssue.url,'_blank');
+  else if(selectedIssue&&jiraConfig.url) window.open(`${jiraConfig.url}/browse/${selectedIssue.key}`,'_blank');
+}
+
+// ══ DEMO DATA ══
+// ══ JIRA CONNECTION ══
+
+// Load config from C:/Downloads/JiraRoadmap/jira-config.json via file picker
+async function loadConfigFromFile(){
+  return new Promise((resolve) => {
+    const input = document.createElement('input');
+    input.type='file'; input.accept='.json';
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if(!file){ resolve(null); return; }
+      try {
+        const text = await file.text();
+        const cfg = JSON.parse(text);
+        // Populate modal fields
+        if(cfg.url || cfg.jiraUrl) document.getElementById('cfJiraUrl').value = cfg.url||cfg.jiraUrl||'';
+        if(cfg.email) document.getElementById('cfEmail').value = cfg.email;
+        if(cfg.token) document.getElementById('cfToken').value = cfg.token;
+        if(cfg.projects) document.getElementById('cfProjects').value = cfg.projects;
+        // Merge into jiraConfig (preserve hardcoded proxy)
+        jiraConfig = {
+          proxyUrl: PROXY_URL,
+          url: cfg.url||cfg.jiraUrl||jiraConfig.url,
+          email: cfg.email||jiraConfig.email,
+          token: cfg.token||jiraConfig.token,
+          projects: cfg.projects||jiraConfig.projects,
+          jql: cfg.jql||jiraConfig.jql,
+          teamsWebhookUrl: cfg.teamsWebhookUrl||jiraConfig.teamsWebhookUrl||'',
+          targetEndField: cfg.targetEndField||jiraConfig.targetEndField||'customfield_10015',
+          requiredByField: cfg.requiredByField||jiraConfig.requiredByField||'customfield_10022'
+        };
+        localStorage.setItem('jiraGanttConfig', JSON.stringify(jiraConfig));
+        showToast('✅ Config loaded from file','success');
+        resolve(jiraConfig);
+      } catch(err){
+        showToast('Failed to parse config file: '+err.message,'error');
+        resolve(null);
+      }
+    };
+    input.click();
+  });
+}
+
+// ── CONFIG FILE PATH ──
+const JIRA_CONFIG_FILENAME = 'jira-config.json';
+const JIRA_CONFIG_PATH_HINT = 'C:\\Downloads\\JiraRoadmap\\';
+
+// ── Track connection state ──
+let jiraConnected = false;
+
+function isConfigSaved(){
+  return !!localStorage.getItem('jiraConfigFileSaved');
+}
+function markConfigSaved(){
+  localStorage.setItem('jiraConfigFileSaved', '1');
+}
+
+// ── Update topbar button states ──
+function updateBtnStates(){
+  const cfgBtn = document.getElementById('configureBtn');
+  const conBtn = document.getElementById('connectBtn');
+  if(!cfgBtn || !conBtn) return;
+
+  if(jiraConnected){
+    // Configure Jira: keep enabled so user can reconfigure
+    cfgBtn.style.opacity = ''; cfgBtn.style.cursor = ''; cfgBtn.disabled = false;
+    cfgBtn.title = 'Reconfigure Jira connection';
+    cfgBtn.innerHTML = '⚙️ Configure Jira';
+    // Connect Jira: show as connected but keep clickable to re-fetch
+    conBtn.style.opacity = ''; conBtn.style.cursor = ''; conBtn.disabled = false;
+    conBtn.title = 'Re-fetch issues from Jira';
+    conBtn.innerHTML = '✅ Connected — click to refresh';
+  } else {
+    cfgBtn.style.opacity = ''; cfgBtn.style.cursor = ''; cfgBtn.title = ''; cfgBtn.disabled = false;
+    cfgBtn.innerHTML = '⚙️ Configure Jira';
+    conBtn.style.opacity = ''; conBtn.style.cursor = ''; conBtn.title = 'Auto-load config from C:\\Downloads\\JiraRoadmap\\jira-config.json and connect'; conBtn.disabled = false;
+    conBtn.innerHTML = '🔌 Connect Jira';
+  }
+}
+
+// ── Open Configure Jira modal ──
+// ── Modal open / close ──────────────────────────────────────────────────────
+function closeModal(id){
+  const el = document.getElementById(id);
+  if(el) el.classList.remove('open');
+}
+// Click outside modal box to dismiss
+document.addEventListener('click', e => {
+  document.querySelectorAll('.modal-overlay.open').forEach(overlay => {
+    if(e.target === overlay) overlay.classList.remove('open');
+  });
+});
+// ESC key closes the top-most open modal
+document.addEventListener('keydown', e => {
+  if(e.key !== 'Escape') return;
+  const open = document.querySelector('.modal-overlay.open');
+  if(open) open.classList.remove('open');
+});
+
+function openConnectModal(){ openConfigureModal(); } // alias for existing callers
+function openConfigureModal(){
+  const infoBox = document.getElementById('cfInfoBox');
+
+  // Pre-fill from localStorage
+  const saved = localStorage.getItem('jiraGanttConfig');
+  if(saved){
+    try {
+      const c = JSON.parse(saved);
+      if(c.url) document.getElementById('cfJiraUrl').value = c.url;
+      if(c.email) document.getElementById('cfEmail').value = c.email;
+      if(c.token) document.getElementById('cfToken').value = c.token;
+      if(c.projects) document.getElementById('cfProjects').value = c.projects;
+    } catch{}
+  }
+
+  if(jiraConnected && infoBox){
+    infoBox.style.background = '#f0fdf4';
+    infoBox.style.borderColor = '#86efac';
+    infoBox.style.color = '#166534';
+    infoBox.innerHTML = '✅ <strong>Jira is already connected.</strong> You can update credentials below and click <em>💾 Save & Connect</em> to reconnect.';
+  } else if(infoBox){
+    infoBox.style.background = '';
+    infoBox.style.borderColor = '';
+    infoBox.style.color = '';
+    infoBox.innerHTML = '⚙️ <strong>Enter your Jira credentials and click <em>💾 Save & Connect</em>.</strong><br>A <code>jira-config.json</code> will download automatically for use with the <strong>🔌 Connect Jira</strong> button next time.';
+  }
+
+  document.getElementById('connectModal').classList.add('open');
+}
+
+function saveJiraConfig(){
+  const url     = document.getElementById('cfJiraUrl').value.trim().replace(/\/$/,'');
+  const email   = document.getElementById('cfEmail').value.trim();
+  const token   = document.getElementById('cfToken').value.trim();
+  const projects= document.getElementById('cfProjects').value.trim();
+  if(!url || !email){ showToast('Fill in Jira URL and Email','error'); return; }
+  if(!token){ showToast('API Token is required to connect','error'); return; }
+
+  jiraConfig = {
+    proxyUrl: PROXY_URL,
+    url, email, token, projects,
+    jql: jiraConfig.jql || '',
+    teamsWebhookUrl: jiraConfig.teamsWebhookUrl || '',
+    targetEndField: document.getElementById('cfTargetEndField')?.value.trim() || jiraConfig.targetEndField || 'customfield_10015',
+    requiredByField: document.getElementById('cfRequiredByField')?.value.trim() || jiraConfig.requiredByField || 'customfield_10022',
+    savedAt: new Date().toISOString(),
+    configPath: JIRA_CONFIG_PATH_HINT + JIRA_CONFIG_FILENAME
+  };
+  localStorage.setItem('jiraGanttConfig', JSON.stringify(jiraConfig));
+
+  // Auto-download config JSON
+  autoDownloadConfigJson(jiraConfig);
+
+  syncJqlPrefix();
+
+  // Guarantee a fallback JQL so applyRoadmapJql() can always run
+  const jqlEl = document.getElementById('roadmapJql');
+  if(jqlEl && !jqlEl.value.trim()){
+    const keys = projects ? projects.split(',').map(p=>p.trim()).filter(Boolean) : [];
+    jqlEl.value = keys.length
+      ? (keys.length === 1
+          ? `project = ${keys[0]} AND statusCategory != Done ORDER BY duedate ASC`
+          : `project in (${keys.join(', ')}) AND statusCategory != Done ORDER BY duedate ASC`)
+      : 'statusCategory != Done ORDER BY duedate ASC';
+  }
+
+  closeModal('connectModal');
+  showToast('✅ Config saved — connecting to Jira…', 'success');
+  markConfigSaved();
+
+  // Actually connect
+  applyRoadmapJql().then(()=>{
+    jiraConnected = true;
+    updateBtnStates();
+  }).catch(()=>{
+    // Don't mark as connected on failure — keep buttons enabled so user can retry
+    updateBtnStates();
+  });
+}
+
+function autoDownloadConfigJson(cfg){
+  const exportCfg = {
+    _note: 'Place this file at ' + JIRA_CONFIG_PATH_HINT + JIRA_CONFIG_FILENAME,
+    configPath: JIRA_CONFIG_PATH_HINT + JIRA_CONFIG_FILENAME,
+    ...cfg
+  };
+  const blob = new Blob([JSON.stringify(exportCfg, null, 2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = JIRA_CONFIG_FILENAME;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function exportConfigJson(){
+  autoDownloadConfigJson(jiraConfig);
+  showToast('✅ ' + JIRA_CONFIG_FILENAME + ' downloading — place it in ' + JIRA_CONFIG_PATH_HINT, 'success');
+}
+
+// ── Connect Jira button: load JSON file from disk and connect ──
+async function connectJiraFromFile(){
+  // If we already have a full saved config (url + email + token), connect directly
+  const hasFull = !!(jiraConfig.url && jiraConfig.email && jiraConfig.token);
+  if(hasFull){
+    showToast('🔌 Connecting to Jira…', 'info');
+    setLoading(true);
+    try {
+      const auth = btoa(`${jiraConfig.email}:${jiraConfig.token}`);
+      const jqlEl = document.getElementById('roadmapJql');
+      const jql = (jqlEl && jqlEl.value.trim()) ||
+        (jiraConfig.projects
+          ? `project in (${jiraConfig.projects.split(',').map(p=>p.trim()).join(', ')}) AND statusCategory != Done ORDER BY duedate ASC`
+          : 'statusCategory != Done ORDER BY duedate ASC');
+      const raw = await fetchAllIssues(jiraConfig.proxyUrl || PROXY_URL, jiraConfig.url, auth, jql,
+        (done, total) => showToast(`Fetching… ${done}/${total} issues`, 'info'));
+      rawJiraIssues = raw;
+      issues = raw.map(r => mapIssue(r, jiraConfig.url));
+      applyFilters(); goToToday();
+      populateRawDataTab(raw);
+      showToast(`✅ Loaded ${issues.length} issues from Jira`, 'success');
+      jiraConnected = true;
+      updateBtnStates();
+    } catch(e) {
+      const msg = e.message || 'Unknown error';
+      if(msg.toLowerCase().includes('401') || msg.toLowerCase().includes('unauthori') || msg.toLowerCase().includes('forbidden')){
+        showToast('❌ Auth failed — check your email and API token in ⚙️ Configure Jira', 'error');
+      } else if(msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('CORS') || msg.includes('proxy')){
+        showToast('❌ Network/CORS error — enter your Cloudflare Worker URL in ⚙️ Configure Jira → Proxy URL', 'error');
+      } else {
+        showToast('❌ ' + msg, 'error');
+      }
+    } finally {
+      setLoading(false);
+    }
+    return;
+  }
+
+  // If we have url+email but no token, open modal so user can re-enter token
+  const hasSaved = !!(jiraConfig.url && jiraConfig.email);
+  if(hasSaved){
+    openConfigureModal();
+    return;
+  }
+
+  // Otherwise try to load from a JSON file first, then open the modal pre-filled
+  showToast('📂 Select your jira-config.json — or click Configure Jira to enter manually', 'info');
+  return new Promise((resolve) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    // If user cancels the file picker, open the modal so they can type manually
+    input.addEventListener('cancel', () => { openConfigureModal(); resolve(null); });
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if(!file){ openConfigureModal(); resolve(null); return; }
+      try {
+        const text = await file.text();
+        const cfg = JSON.parse(text);
+
+        // Merge into jiraConfig
+        jiraConfig = {
+          proxyUrl: cfg.proxyUrl || PROXY_URL,
+          url: cfg.url || cfg.jiraUrl || jiraConfig.url,
+          email: cfg.email || jiraConfig.email,
+          token: cfg.token || jiraConfig.token,
+          projects: cfg.projects || jiraConfig.projects,
+          jql: cfg.jql || jiraConfig.jql,
+          teamsWebhookUrl: cfg.teamsWebhookUrl || jiraConfig.teamsWebhookUrl || '',
+          targetEndField: cfg.targetEndField || jiraConfig.targetEndField || 'customfield_10015',
+          requiredByField: cfg.requiredByField || jiraConfig.requiredByField || 'customfield_10022'
+        };
+        localStorage.setItem('jiraGanttConfig', JSON.stringify(jiraConfig));
+        // Open the configure modal pre-filled so the user can review and confirm
+        openConfigureModal();
+        showToast('✅ Config loaded from file — review and click Save & Connect', 'success');
+        resolve(jiraConfig);
+      } catch(err){
+        showToast('❌ Failed to parse config file: ' + err.message, 'error');
+        openConfigureModal(); // fallback: let user enter manually
+        resolve(null);
+      }
+    };
+    input.click();
+  });
+}
+
+// ── Backwards-compat alias ──
+async function loadConfigFromFile(){ return connectJiraFromFile(); }
+
+async function connectJiraDirectly(){
+  const cfg = jiraConfig;
+  if(!cfg.url||!cfg.email){ showToast('Connect Jira first','error'); return; }
+  const proxy = cfg.proxyUrl || PROXY_URL;
+  let token = cfg.token||'';
+  if(!token){ token=prompt('Enter your Jira API token:'); if(!token) return; }
+  const jql = document.getElementById('roadmapJql').value.trim() || 
+    (cfg.projects ? `project in (${cfg.projects.split(',').map(p=>p.trim()).join(', ')}) AND statusCategory != Done ORDER BY duedate ASC` : 'statusCategory != Done ORDER BY duedate ASC');
+  setLoading(true); showToast('Connecting to Jira…','info');
+  try {
+    const auth = btoa(`${cfg.email}:${token}`);
+    issues = (await fetchAllIssues(proxy, cfg.url, auth, jql)).map(r=>mapIssue(r, cfg.url));
+    applyFilters(); goToToday();
+    showToast(`✅ Loaded ${issues.length} issues from Jira`,'success');
+  } catch(e){
+    const msg = e.message || 'Unknown error';
+    if(msg.includes('Cannot reach Jira') || msg.includes('proxy')){
+      showToast('❌ ' + msg.split('\n')[0], 'error');
+      // Show extended guidance in console
+      console.error('[Jira connect]', msg);
+    } else if(msg.toLowerCase().includes('401') || msg.toLowerCase().includes('unauthori') || msg.toLowerCase().includes('forbidden')){
+      showToast('❌ Auth failed — check your email and API token in Configure Jira', 'error');
+    } else if(msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('CORS')){
+      showToast('❌ Network error — Jira Cloud requires a proxy URL (Configure Jira → Proxy URL)', 'error');
+    } else {
+      showToast('❌ ' + msg, 'error');
+    }
+  }
+  finally { setLoading(false); }
+}
+
+async function applyRoadmapJql(){
+  const jql = document.getElementById('roadmapJql').value.trim();
+  if(!jql){ showToast('Enter a JQL query','error'); return; }
+  let cfg = jiraConfig;
+  if(!cfg.url || !cfg.email){
+    showToast('⚙️ Please configure Jira first — enter your URL, email and API token', 'error');
+    openConnectModal();
+    return;
+  }
+  const proxy = cfg.proxyUrl || PROXY_URL;
+  let token = cfg.token || '';
+  if(!token){
+    // Token missing — open configure modal so user can enter it
+    showToast('⚙️ API token missing — please enter it in Configure Jira', 'error');
+    openConnectModal();
+    return;
+  }
+  setLoading(true); showToast('Fetching all Jira fields…','info');
+  try {
+    const auth = btoa(`${cfg.email}:${token}`);
+    const rawFetched = await fetchAllIssues(proxy, cfg.url, auth, jql, (done, total)=>{
+      showToast(`Fetching… ${done}/${total} issues`,'info');
+    });
+    rawJiraIssues = rawFetched;
+    issues = rawFetched.map(r=>mapIssue(r, cfg.url));
+    jiraConfig.jql = jql;
+    localStorage.setItem('jiraGanttConfig', JSON.stringify(jiraConfig));
+    applyFilters(); goToToday();
+    populateRawDataTab(rawFetched);
+    showToast(`✅ Loaded ${issues.length} issues · all fields`,'success');
+  } catch(e){
+    const msg = e.message || 'Unknown error';
+    if(msg.includes('Cannot reach Jira') || msg.includes('proxy')){
+      showToast('❌ ' + msg.split('\n')[0], 'error');
+      // Show extended guidance in console
+      console.error('[Jira connect]', msg);
+    } else if(msg.toLowerCase().includes('401') || msg.toLowerCase().includes('unauthori') || msg.toLowerCase().includes('forbidden')){
+      showToast('❌ Auth failed — check your email and API token in Configure Jira', 'error');
+    } else if(msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('CORS')){
+      showToast('❌ Network error — Jira Cloud requires a proxy URL (Configure Jira → Proxy URL)', 'error');
+    } else {
+      showToast('❌ ' + msg, 'error');
+    }
+  }
+  finally { setLoading(false); }
+}
+
+function syncJqlPrefix(){
+  const proj = document.getElementById('cfProjects').value.trim();
+  const jqlEl = document.getElementById('roadmapJql');
+  if(!proj) return;
+  const keys = proj.split(',').map(p=>p.trim()).filter(Boolean);
+  const prefix = keys.length===1?`project = ${keys[0]}`:`project in (${keys.join(', ')})`;
+  const cur = jqlEl.value.trim();
+  const rx = /^project\s*(=\s*\w+|in\s*\([^)]*\))\s*(AND\s*)?/i;
+  jqlEl.value = rx.test(cur) ? cur.replace(rx,prefix+' AND ') : cur ? `${prefix} AND ${cur}` : `${prefix} AND statusCategory != Done ORDER BY duedate ASC`;
+}
+
+async function fetchAllIssues(proxy, base, auth, jql, onProgress){
+  // Strategy:
+  //   1. Try direct Jira API (works for Jira Data Center / Server with CORS open)
+  //   2. Fall back to proxy worker (required for Jira Cloud due to CORS)
+  // Both paths paginate identically using startAt / total.
+  const PAGE = 100;
+
+  // ── Page fetcher: direct Jira REST API ──────────────────────────────────
+  async function fetchPageDirect(startAt){
+    const url = `${base}/rest/api/3/search`;
+    const params = new URLSearchParams({
+      jql, fields: '*all', maxResults: String(PAGE), startAt: String(startAt)
+    });
+    const r = await fetch(`${url}?${params}`, {
+      headers: { 'Authorization': `Basic ${auth}`, 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(30000)
+    });
+    if(!r.ok){
+      const e = await r.json().catch(()=>({}));
+      const msg = e.errorMessages?.[0] || e.message || e.error || `HTTP ${r.status}`;
+      if(r.status === 401) throw new Error('AUTH_FAIL:' + msg);
+      if(r.status === 403) throw new Error('AUTH_FAIL:Forbidden — check your API token and email');
+      throw new Error(msg);
+    }
+    return r.json();
+  }
+
+  // ── Page fetcher: via proxy worker ──────────────────────────────────────
+  async function fetchPageProxy(startAt){
+    if(!proxy) throw new Error('NO_PROXY');
+    const p = new URLSearchParams({
+      jiraBase: base, auth, jql,
+      fields: '*all',
+      maxResults: String(PAGE),
+      startAt: String(startAt)
+    });
+    const r = await fetch(`${proxy}/jira?${p}`, {signal: AbortSignal.timeout(30000)});
+    if(!r.ok){
+      const e = await r.json().catch(()=>({}));
+      const msg = e.errorMessages?.[0] || e.message || e.error || `HTTP ${r.status}`;
+      if(r.status === 401 || r.status === 403) throw new Error('AUTH_FAIL:' + msg);
+      throw new Error('PROXY_ERR:' + msg);
+    }
+    return r.json();
+  }
+
+  // ── Probe which strategy works, then paginate with it ───────────────────
+  let useDirect = false;
+  let firstData;
+  try {
+    firstData = await fetchPageDirect(0);
+    useDirect = true;
+    console.info('[Jira] Connected directly (no proxy needed)');
+  } catch(directErr){
+    const msg = directErr.message || '';
+    // AUTH failures are definitive — no point trying the proxy
+    if(msg.startsWith('AUTH_FAIL:'))
+      throw new Error(msg.replace('AUTH_FAIL:',''));
+    // CORS / network error → try proxy
+    console.info('[Jira] Direct failed (' + msg + ') — trying proxy');
+    try {
+      firstData = await fetchPageProxy(0);
+      console.info('[Jira] Connected via proxy');
+    } catch(proxyErr){
+      const pm = proxyErr.message || '';
+      if(pm.startsWith('AUTH_FAIL:'))
+        throw new Error(pm.replace('AUTH_FAIL:',''));
+      if(pm === 'NO_PROXY' || directErr.message?.includes('Failed to fetch') || directErr.message?.includes('CORS')){
+        throw new Error(
+          'Cannot reach Jira. If you are using Jira Cloud, a proxy is required. ' +
+          'Enter your Cloudflare Worker URL in Configure Jira → Proxy URL. ' +
+          '(Direct error: ' + directErr.message + ')'
+        );
+      }
+      throw new Error('Proxy error: ' + pm.replace('PROXY_ERR:',''));
+    }
+  }
+
+  // ── Paginate ─────────────────────────────────────────────────────────────
+  const fetchPage = useDirect ? fetchPageDirect : fetchPageProxy;
+  const firstPage = firstData.issues || [];
+  const total = firstData.total || firstPage.length;
+  let all = [...firstPage];
+  let startAt = firstPage.length;
+  if(onProgress) onProgress(all.length, total);
+
+  while(startAt < total){
+    const data = await fetchPage(startAt);
+    const page = data.issues || [];
+    if(!page.length) break;
+    all = all.concat(page);
+    startAt += page.length;
+    if(onProgress) onProgress(all.length, total);
+  }
+  return all;
+}
+
+function mapIssue(raw, baseUrl){
+  const targetField = jiraConfig.targetEndField || 'customfield_10025';
+  const requiredByField = jiraConfig.requiredByField || 'customfield_10022';
+  const f = raw.fields || {};
+
+  // Normalise any field value to a YYYY-MM-DD string; returns null if not a recognisable date.
+  // This handles plain dates ("2024-05-14"), ISO datetime strings
+  // ("2024-05-14T00:00:00.000+0000"), and Jira object values ({ value: "2024-05-14" }).
+  function toDateStr(v){
+    if(!v) return null;
+    if(typeof v === 'string' && v.match(/^\d{4}-\d{2}-\d{2}/)) return v.slice(0, 10);
+    if(typeof v === 'object' && v !== null && typeof v.value === 'string'
+        && v.value.match(/^\d{4}-\d{2}-\d{2}/)) return v.value.slice(0, 10);
+    return null;
+  }
+
+  // Try configured field first (with full date validation), then aliases.
+  // Both primary and alias values are normalised through toDateStr so datetime
+  // strings are always trimmed to YYYY-MM-DD and non-date garbage is rejected.
+  function resolveDate(primaryField, ...aliases){
+    const primary = toDateStr(f[primaryField]);
+    if(primary) return primary;
+    for(const a of aliases){
+      const d = toDateStr(f[a]);
+      if(d) return d;
+    }
+    return null;
+  }
+
+  // Common customfield candidates for Target End Date (varies by Jira instance)
+  const targetEndDate = resolveDate(
+    targetField,
+    'customfield_10015','customfield_10025','customfield_10030','customfield_10032',
+    'customfield_10040','customfield_10060','customfield_10070','customfield_10080',
+    'customfield_13000','customfield_13001','customfield_13100',
+    'targetEndDate','targetDate','target_end','target_date','dueDate'
+  );
+
+  // Common customfield candidates for Required By Date
+  const requiredByDate = resolveDate(
+    requiredByField,
+    'customfield_10022','customfield_10023','customfield_10035','customfield_10036',
+    'customfield_10050','customfield_10055','customfield_10090','customfield_10091',
+    'customfield_12000','customfield_12001','customfield_12100',
+    'requiredByDate','required_by','needed_by','deadline'
+  );
+
+  // dueDate: standard Jira field + common aliases, all normalised
+  const dueDate = resolveDate('duedate', 'due_date', 'dueDate', 'customfield_10021');
+
+  const _cf20 = f.customfield_10020;
+  const storyType = typeof _cf20?.value === 'string' ? _cf20.value
+                  : typeof _cf20 === 'string' ? _cf20
+                  : null;
+  // Fix: detect Enabler by storyType *or* issuetype.name so items whose
+  // issuetype is "Enabler" (rather than carrying a storyType custom-field)
+  // are treated identically. Use case-insensitive / partial match for robustness.
+  const _storyTypeLower = (typeof storyType === 'string' ? storyType : '').toLowerCase();
+  const _issueTypeLower = (f.issuetype?.name||'').toLowerCase();
+  const isSIT = _storyTypeLower.includes('enabler') || _issueTypeLower.includes('enabler');
+
+  // For SIT (Enabler) items: ALWAYS derive startDate as requiredByDate − 5 working days
+  // when requiredByDate is available (business rule). Only keep stored start fields
+  // when requiredByDate is absent.
+  let startDate = toDateStr(f.startdate) || toDateStr(f.customfield_10023) || toDateStr(f.customfield_10027) || null;
+  if(isSIT && requiredByDate){
+    const rbD = parseDate(requiredByDate);
+    if(rbD){
+      const sd = subtractWorkingDays(rbD, 5);
+      startDate = `${sd.getFullYear()}-${String(sd.getMonth()+1).padStart(2,'0')}-${String(sd.getDate()).padStart(2,'0')}`;
+    }
+  }
+
+  return {
+    key: raw.key,
+    summary: f.summary,
+    status: f.status?.name||'Unknown',
+    priority: f.priority?.name||'None',
+    component: f.components?.[0]?.name||'General',
+    assignee: f.assignee?.displayName||'Unassigned',
+    assigneeEmail: f.assignee?.emailAddress||null,
+    startDate,
+    dueDate,
+    requiredByDate,
+    description: extractDesc(f.description),
+    type: f.issuetype?.name||'Task',
+    storyType,
+    points: f.customfield_10016||null,
+    url: baseUrl?`${baseUrl}/browse/${raw.key}`:'',
+    parentKey: f.parent?.key||f.customfield_10014||null,
+    targetEndDate,
+    // keep the raw fields reference for the Fields tab
+    _raw: raw
+  };
+}
+
+function extractDesc(d){
+  if(!d) return 'No description.';
+  if(typeof d==='string') return d;
+  try {
+    const t=[];
+    const ex=n=>{ if(n.type==='text') t.push(n.text); if(n.content) n.content.forEach(ex); };
+    ex(d); return t.join(' ')||'No description.';
+  } catch { return 'No description.'; }
+}
+
+// ══ TAB MANAGEMENT ══
+function switchTab(tab){
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
+  const lbl = document.getElementById('activeTabLabel');
+  if(lbl) lbl.textContent = tab === 'dev' ? 'Dev' : tab;
+  if(tab==='dev') renderGantt();
+}
+
+
+// Stub — SIT/UAT panels removed; kept to prevent errors in unreachable code paths
+function renderTabGantt(tab){}
+// ── RAW JIRA DATA TAB ──
+let _rawTableCols = [];
+let _rawJsonVisible = false;
+
+function populateRawDataTab(rawIssues){
+  const empty = document.getElementById('rawEmpty');
+  const table = document.getElementById('rawTable');
+  const thead = document.getElementById('rawThead');
+  const tbody = document.getElementById('rawTbody');
+  const countEl = document.getElementById('rawDataCount');
+
+  // Raw Data panel may not be present — bail out safely
+  if(!empty || !table || !thead || !tbody) return;
+
+  if(!rawIssues||!rawIssues.length){
+    empty.style.display='flex'; table.style.display='none';
+    if(countEl) countEl.textContent='No data loaded';
+    return;
+  }
+
+  // Collect all unique flat field keys across all issues
+  const fieldKeys = new Set(['key']);
+  rawIssues.forEach(r=>{
+    if(r.fields) Object.keys(r.fields).forEach(k=>fieldKeys.add('fields.'+k));
+  });
+  // Prioritise important fields at front
+  const priority = ['key','fields.summary','fields.status','fields.issuetype','fields.priority','fields.assignee',
+    'fields.duedate','fields.startdate','fields.customfield_10015','fields.parent','fields.components',
+    'fields.customfield_10022','fields.customfield_10025','fields.customfield_10016'];
+  const allKeys = [...priority.filter(k=>fieldKeys.has(k)), ...[...fieldKeys].filter(k=>!priority.includes(k))];
+  _rawTableCols = allKeys;
+
+  // Build header
+  thead.innerHTML = '<tr>'+allKeys.map(k=>{
+    const label = k.replace('fields.','').replace(/customfield_/,'cf_');
+    return `<th title="${k}" style="white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis">${label}</th>`;
+  }).join('')+'</tr>';
+
+  // Build rows
+  window._rawAllRows = rawIssues.map(r=>{
+    const cells = allKeys.map(k=>{
+      let val = '';
+      if(k==='key') val = r.key||'';
+      else {
+        const parts = k.split('.'); let obj = r;
+        for(const p of parts){ obj = obj?.[p]; if(obj===undefined||obj===null) break; }
+        if(obj===null||obj===undefined) val='';
+        else if(typeof obj==='object') val = obj.name||obj.displayName||obj.value||obj.key||JSON.stringify(obj);
+        else val = String(obj);
+      }
+      return val;
+    });
+    return cells;
+  });
+
+  renderRawTable(window._rawAllRows);
+
+  if(countEl) countEl.textContent = `${rawIssues.length} issues · ${allKeys.length} fields`;
+  empty.style.display='none';
+  table.style.display='table';
+
+  // Update JSON view
+  const pre = document.getElementById('rawJsonPre');
+  if(pre) pre.textContent = JSON.stringify(rawIssues, null, 2);
+}
+
+function renderRawTable(rows){
+  const tbody = document.getElementById('rawTbody');
+  if(!tbody) return;
+  tbody.innerHTML = rows.map((cells, ri)=>{
+    return '<tr>'+cells.map((c,ci)=>{
+      const isKey = _rawTableCols[ci]==='key';
+      const display = c.length>80 ? c.slice(0,78)+'…' : c;
+      return `<td title="${c.replace(/"/g,"'")}" style="max-width:${isKey?'120px':'200px'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;${isKey?'font-family:var(--mono);font-weight:600;color:var(--accent)':''}">${display}</td>`;
+    }).join('')+'</tr>';
+  }).join('');
+}
+
+function rawFilterTable(){
+  const q = (document.getElementById('rawSearchInput')?.value||'').toLowerCase();
+  if(!window._rawAllRows) return;
+  const filtered = q ? window._rawAllRows.filter(cells=>cells.some(c=>c.toLowerCase().includes(q))) : window._rawAllRows;
+  renderRawTable(filtered);
+}
+
+function exportRawCsv(){
+  if(!window._rawAllRows||!_rawTableCols.length){ showToast('No raw data to export','error'); return; }
+  const escape = s => `"${String(s).replace(/"/g,'""')}"`;
+  const header = _rawTableCols.map(k=>escape(k.replace('fields.',''))).join(',');
+  const rows = window._rawAllRows.map(cells=>cells.map(c=>escape(c)).join(','));
+  const csv = [header,...rows].join('\n');
+  const blob = new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='jira_raw_data.csv'; a.click(); URL.revokeObjectURL(a.href);
+  showToast('✅ CSV exported','success');
+}
+
+function rawToggleJson(){
+  const rtw = document.getElementById('rawTableWrap');
+  const rjw = document.getElementById('rawJsonWrap');
+  const rjb = document.getElementById('rawJsonBtn');
+  if(!rtw||!rjw||!rjb) return;
+  _rawJsonVisible = !_rawJsonVisible;
+  rtw.style.display = _rawJsonVisible ? 'none' : 'flex';
+  rjw.style.display = _rawJsonVisible ? 'flex' : 'none';
+  rjb.textContent = _rawJsonVisible ? '📋 Show Table' : '{ } Show JSON';
+}
+
+// ── Raw tab independent fetch ──
+let _rawFetching = false;
+async function fetchRawTabData(){
+  if(_rawFetching){ showToast('Already fetching…','info'); return; }
+  const jqlEl = document.getElementById('rawJql');
+  const jql = jqlEl ? jqlEl.value.trim() : '';
+  if(!jql){ showToast('Enter a JQL query in the Raw tab','error'); return; }
+  let cfg = jiraConfig;
+  if(!cfg.url||!cfg.email){
+    const fileCfg = await loadConfigFromFile();
+    if(!fileCfg){ openConnectModal(); return; }
+    cfg = fileCfg;
+  }
+  const proxy = cfg.proxyUrl || PROXY_URL;
+  let token = cfg.token||'';
+  if(!token){ token=prompt('Enter your Jira API token:'); if(!token) return; }
+
+  _rawFetching = true;
+  const btn = document.getElementById('rawFetchBtn');
+  const spinner = document.getElementById('rawFetchSpinner');
+  const progressWrap = document.getElementById('rawProgressWrap');
+  const progressBar = document.getElementById('rawProgressBar');
+  const progressText = document.getElementById('rawProgressText');
+
+  if(btn) btn.disabled = true;
+  if(spinner) spinner.style.display = 'block';
+  if(progressWrap){ progressWrap.style.display = 'flex'; progressBar.style.width='0%'; progressText.textContent='0 / ?'; }
+  showToast('Fetching all fields from Jira…','info');
+
+  try {
+    const auth = btoa(`${cfg.email}:${token}`);
+    const rawFetched = await fetchAllIssues(proxy, cfg.url, auth, jql, (done, total)=>{
+      const pct = total > 0 ? Math.round((done/total)*100) : 0;
+      if(progressBar) progressBar.style.width = pct+'%';
+      if(progressText) progressText.textContent = `${done} / ${total}`;
+    });
+    rawJiraIssues = rawFetched;
+    populateRawDataTab(rawFetched);
+    if(progressBar) progressBar.style.width='100%';
+    if(progressText) progressText.textContent = `${rawFetched.length} / ${rawFetched.length}`;
+    showToast(`✅ Loaded ${rawFetched.length} issues with all fields`,'success');
+    setTimeout(()=>{ if(progressWrap) progressWrap.style.display='none'; }, 3000);
+  } catch(e){
+    showToast(`Fetch failed: ${e.message}`,'error');
+    if(progressWrap) progressWrap.style.display='none';
+  } finally {
+    _rawFetching = false;
+    if(btn) btn.disabled = false;
+    if(spinner) spinner.style.display = 'none';
+  }
+}
+
+// ── PER-TAB JQL APPLY ──
+async function applyTabJql(tab){
+  const jqlEl = document.getElementById(tab+'Jql');
+  const jql = jqlEl ? jqlEl.value.trim() : '';
+  if(!jql){ showToast('Enter a JQL query','error'); return; }
+  let cfg = jiraConfig;
+  if(!cfg.url||!cfg.email){
+    const fileCfg = await loadConfigFromFile();
+    if(!fileCfg){ openConnectModal(); return; }
+    cfg = fileCfg;
+  }
+  const proxy = cfg.proxyUrl || PROXY_URL;
+  let token = cfg.token||'';
+  if(!token){ token=prompt('Enter your Jira API token:'); if(!token) return; }
+  setLoading(true); showToast(`Applying ${tab.toUpperCase()} JQL…`,'info');
+  try {
+    const auth = btoa(`${cfg.email}:${token}`);
+    const fetched = (await fetchAllIssues(proxy, cfg.url, auth, jql)).map(r=>mapIssue(r, cfg.url));
+    tabState[tab].issues = fetched;
+    tabState[tab].jql = jql;
+    applyTabFilters(tab);
+    goToTodayTab(tab);
+    showToast(`✅ Loaded ${fetched.length} issues for ${tab.toUpperCase()}`,'success');
+  } catch(e){
+    const msg = e.message || 'Unknown error';
+    if(msg.includes('Cannot reach Jira') || msg.includes('proxy')){
+      showToast('❌ ' + msg.split('\n')[0], 'error');
+      // Show extended guidance in console
+      console.error('[Jira connect]', msg);
+    } else if(msg.toLowerCase().includes('401') || msg.toLowerCase().includes('unauthori') || msg.toLowerCase().includes('forbidden')){
+      showToast('❌ Auth failed — check your email and API token in Configure Jira', 'error');
+    } else if(msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('CORS')){
+      showToast('❌ Network error — Jira Cloud requires a proxy URL (Configure Jira → Proxy URL)', 'error');
+    } else {
+      showToast('❌ ' + msg, 'error');
+    }
+  }
+  finally { setLoading(false); }
+}
+
+function applyTabFilters(tab){
+  const st = tabState[tab];
+  const norm = s => (s||'').toLowerCase()==='new'?'To Do':s;
+  st.filteredIssues = st.issues.filter(i=>{
+    const sn = norm(i.status);
+    return st.activeFilters.has('all') || st.activeFilters.has(sn);
+  });
+  renderTabIssueList(tab);
+  renderTabStats(tab);
+  renderTabGantt(tab);
+  renderEpicTree(tab === 'dev' ? null : tab);
+}
+
+function toggleTabStatusFilter(el, tab, status){
+  const st = tabState[tab];
+  const filterId = tab+'StatusFilters';
+  if(status==='all'){
+    st.activeFilters = new Set(['all']);
+    document.querySelectorAll('#'+filterId+' .tag').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+  } else {
+    st.activeFilters.delete('all');
+    const allTag = document.querySelector('#'+filterId+' .tag[data-f="all"]');
+    if(allTag) allTag.classList.remove('active');
+    if(st.activeFilters.has(status)){ st.activeFilters.delete(status); el.classList.remove('active'); }
+    else { st.activeFilters.add(status); el.classList.add('active'); }
+    if(st.activeFilters.size===0){
+      st.activeFilters = new Set(['all']);
+      if(allTag) allTag.classList.add('active');
+    }
+  }
+  applyTabFilters(tab);
+}
+
+function renderTabIssueList(tab){
+  const st = tabState[tab];
+  const listEl = document.getElementById(tab+'IssueList');
+  const countEl = document.getElementById(tab+'IssueCount');
+  if(!listEl) return;
+  if(countEl) countEl.textContent = st.filteredIssues.length;
+  if(!st.filteredIssues.length){
+    listEl.innerHTML='<div style="text-align:center;padding:16px;font-size:0.71rem;color:rgba(255,255,255,0.4)">No issues match filters</div>';
+    return;
+  }
+  const today = new Date(); today.setHours(0,0,0,0);
+  listEl.innerHTML = st.filteredIssues.slice(0,150).map(i=>{
+    const sc = getStatusClass(i.status);
+    let dueTxt='';
+    if(i.dueDate){
+      const due = parseDate(i.dueDate);
+      const diff = Math.round((due-today)/86400000);
+      const isOv = diff<0 && !i.status.toLowerCase().includes('done');
+      const cls = isOv?'overdue':diff>=0&&diff<=5?'soon':'';
+      const txt = isOv?`${Math.abs(diff)}d overdue`:diff===0?'Due today':`in ${diff}d`;
+      dueTxt=`<span class="due-pill ${cls}">📅 ${txt}</span>`;
+    }
+    return `<div class="il-item" onclick="openIssueDetail('${i.key}')">
+      <div class="il-key">${i.type==='Epic'?'⚡':''} ${i.key}</div>
+      <div class="il-summary">${i.summary}</div>
+      <div class="il-meta"><span class="sbadge ${sc}">${i.status}</span>${dueTxt}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderTabStats(tab){
+  const st = tabState[tab];
+  const today = new Date(); today.setHours(0,0,0,0);
+  let todo=0,prog=0,rev=0,done=0,block=0,hold=0,over=0;
+  st.filteredIssues.forEach(i=>{
+    const l=(i.status||'').toLowerCase();
+    if(l.includes('done')||l.includes('closed')) done++;
+    else if(l.includes('progress')) prog++;
+    else if(l.includes('review')) rev++;
+    else if(l.includes('block')) block++;
+    else if(l.includes('hold')) hold++;
+    else todo++;
+    if(i.dueDate && parseDate(i.dueDate)<today && !l.includes('done') && !l.includes('closed')) over++;
+  });
+  const pfx = tab+'-st-';
+  [['todo',todo],['prog',prog],['rev',rev],['done',done],['block',block],['hold',hold],['overdue',over]].forEach(([k,v])=>{
+    const el=document.getElementById(pfx+k); if(el) el.textContent=v;
+  });
+}
+
+function navigateTab(tab, dir){
+  const st = tabState[tab];
+  const delta = Math.round(st.ganttDays / 3);
+  st.viewStart = new Date(st.viewStart.getTime() + dir * delta * 86400000);
+  renderTabGantt(tab);
+}
+
+function goToTodayTab(tab){
+  const st = tabState[tab];
+  const t = new Date(); t.setHours(0,0,0,0);
+  // Start at the 1st of the current month
+  const s = new Date(t.getFullYear(), t.getMonth(), 1);
+  st.viewStart = s;
+  st.ganttDays = 120;
+  const sr = document.getElementById('spanRange-'+tab);
+  const sl = document.getElementById('spanLabel-'+tab);
+  if(sr) sr.value = 120;
+  if(sl) sl.textContent = '4mo';
+  renderTabGantt(tab);
+}
+
+function zoomTab(tab, dir){
+  const st = tabState[tab];
+  st.zoomIdx = Math.max(0, Math.min(ZOOM_LEVELS.length-1, st.zoomIdx + dir));
+  const lvl = ZOOM_LEVELS[st.zoomIdx];
+  const lbl = document.getElementById('zoomLabel-'+tab);
+  if(lbl) lbl.textContent = lvl < 1 ? (lvl*100).toFixed(0)+'%' : lvl+'×';
+  renderTabGantt(tab);
+}
+function zoomTabReset(tab){
+  tabState[tab].zoomIdx = 3;
+  const lbl = document.getElementById('zoomLabel-'+tab);
+  if(lbl) lbl.textContent = '1×';
+  renderTabGantt(tab);
+}
+
+function toggleDatePickerFor(tab, ev){
+  ev && ev.stopPropagation();
+  const dd = document.getElementById('dpDropdown-'+tab);
+  if(!dd) return;
+  const st = tabState[tab];
+  const vs = new Date(st.viewStart);
+  st.dpYear = vs.getFullYear(); st.dpMonth = vs.getMonth();
+  buildDatePickerFor(tab);
+  dd.classList.toggle('open');
+}
+
+function buildDatePickerFor(tab){
+  const st = tabState[tab];
+  const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const dd = document.getElementById('dpDropdown-'+tab);
+  if(!dd) return;
+  dd.style.cssText='position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);z-index:500;padding:14px;width:260px;display:block';
+  const first = new Date(st.dpYear,st.dpMonth,1).getDay();
+  const dim = new Date(st.dpYear,st.dpMonth+1,0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+  let days='';
+  for(let i=0;i<first;i++) days+=`<div class="dp-day empty"></div>`;
+  for(let d=1;d<=dim;d++){
+    const dt=new Date(st.dpYear,st.dpMonth,d);
+    const iT=dt.getTime()===today.getTime();
+    days+=`<div class="dp-day ${iT?'today':''}" onclick="dpPickTab('${tab}',${st.dpYear},${st.dpMonth},${d},event)">${d}</div>`;
+  }
+  dd.innerHTML=`<div class="dp-nav-row">
+    <button class="dp-nav-btn" onclick="dpNavTab('${tab}',-1,event)">‹</button>
+    <div class="dp-month-label">${MN[st.dpMonth]} ${st.dpYear}</div>
+    <button class="dp-nav-btn" onclick="dpNavTab('${tab}',1,event)">›</button>
+  </div>
+  <div class="dp-grid">${['Su','Mo','Tu','We','Th','Fr','Sa'].map(d=>`<div class="dp-dayname">${d}</div>`).join('')}</div>
+  <div class="dp-grid">${days}</div>`;
+}
+function dpNavTab(tab, dir, ev){
+  ev && ev.stopPropagation();
+  const st = tabState[tab];
+  st.dpMonth += dir;
+  if(st.dpMonth>11){st.dpMonth=0;st.dpYear++;}
+  if(st.dpMonth<0){st.dpMonth=11;st.dpYear--;}
+  buildDatePickerFor(tab);
+}
+function dpPickTab(tab, y, m, d, ev){
+  ev && ev.stopPropagation();
+  tabState[tab].viewStart = new Date(y,m,d); tabState[tab].viewStart.setHours(0,0,0,0);
+  renderTabGantt(tab);
+  const dd = document.getElementById('dpDropdown-'+tab);
+  if(dd) dd.style.display='none';
+}
+
+// ══ TEAMS NUDGE ══
+function openTeamsModal(){
+  // Populate from saved localStorage or jiraConfig
+  const webhook = jiraConfig.teamsWebhookUrl || localStorage.getItem('teamsWebhookUrl') || '';
+  if(webhook) document.getElementById('teamsWebhookUrl').value = webhook;
+  document.getElementById('teamsSentStatus').style.display='none';
+  renderOverdueList();
+  document.getElementById('teamsModal').classList.add('open');
+}
+
+function getOverdueStories(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const allIssues = [...issues, ...tabState.uat.issues];
+  const seen = new Set();
+  return allIssues.filter(i=>{
+    if(seen.has(i.key)) return false;
+    seen.add(i.key);
+    const due = i.dueDate||i.requiredByDate;
+    const isDone = (i.status||'').toLowerCase().match(/done|closed|resolved|cancel/);
+    if(!due || isDone || i.type==='Epic') return false;
+    return parseDate(due) < today;
+  });
+}
+
+function renderOverdueList(){
+  const list = document.getElementById('overdueList');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const overdue = getOverdueStories();
+  if(!overdue.length){
+    list.innerHTML='<div style="text-align:center;padding:12px;color:#059669;font-size:0.72rem">✅ No overdue stories found</div>';
+    return;
+  }
+  list.innerHTML = overdue.map((i,idx)=>{
+    const due = parseDate(i.dueDate||i.requiredByDate);
+    const days = Math.abs(Math.floor((due-today)/86400000));
+    const hasEmail = !!(i.assigneeEmail);
+    const teamsDeepLinkBtn = hasEmail
+      ? `<button class="overdue-nudge-btn" style="background:#0078d4;border-color:#0078d4" onclick="openTeamsDM('${i.key}',${idx})" title="Open Teams DM to assignee (no webhook needed)">📲 DM</button>`
+      : `<button class="overdue-nudge-btn" style="background:#64748b;border-color:#64748b;cursor:default" disabled title="No assignee email — connect Jira to get email">📲 DM</button>`;
+    return `<div class="overdue-item" id="overdueRow_${idx}">
+      <div class="overdue-item-key">${i.key}</div>
+      <div style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.68rem;color:var(--text)">${i.summary}</div>
+      <div class="overdue-item-who">👤 ${i.assignee||'Unassigned'}</div>
+      <div class="overdue-days">⚠️ ${days}d overdue</div>
+      ${teamsDeepLinkBtn}
+      <button class="overdue-nudge-btn" id="nudgeBtn_${idx}" onclick="sendSingleTeamsNudge('${i.key}', ${idx})" title="Send Teams nudge via Incoming Webhook">
+        💬 Nudge
+      </button>
+    </div>`;
+  }).join('');
+}
+
+// ── Teams Deep Link: DM assignee directly — NO webhook/Group ID needed ──
+// Uses MS Teams deep link which opens Teams with a pre-composed DM to the assignee.
+// Assignee email comes from Jira's assignee.emailAddress field.
+function openTeamsDM(issueKey, rowIdx){
+  const overdue = getOverdueStories();
+  const iss = overdue.find(i=>i.key===issueKey);
+  if(!iss){ showToast('Issue not found','error'); return; }
+  if(!iss.assigneeEmail){ showToast('No assignee email — make sure Jira returns emailAddress','error'); return; }
+
+  const today = new Date();
+  const due = iss.dueDate || iss.requiredByDate;
+  const days = due ? Math.abs(Math.floor((parseDate(due) - today)/86400000)) : '?';
+  const custom = document.getElementById('teamsCustomMsg').value.trim() ||
+    'Please update your story status in Jira — it appears to be overdue. 🙏';
+
+  const msg = `Hi, just a friendly nudge about ${iss.key}: "${iss.summary}". ` +
+    `This item is ${days} day(s) overdue. ${custom}`;
+
+  // Teams deep link — opens Teams app with a pre-composed DM to the assignee.
+  // No webhook URL, no Group ID, no Graph Explorer needed.
+  const deepLink = `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(iss.assigneeEmail)}&message=${encodeURIComponent(msg)}&topicName=${encodeURIComponent('Overdue: ' + iss.key)}`;
+  window.open(deepLink, '_blank');
+  showToast(`📲 Teams DM opened for ${iss.assignee} (${iss.key})`, 'success');
+}
+
+
+// Strategy (in order of preference):
+//  1. Cloudflare proxy /teams-nudge  → server-side forward, full CORS, confirmed response
+//  2. Cloudflare proxy /proxy-post   → generic URL-forward endpoint (simpler to add to worker)
+//  3. Direct fetch with no-cors      → browser fires & forgets; Teams receives it but we can't confirm
+//
+// For confirmed delivery, add ONE of these routes to your Cloudflare Worker:
+//
+//   // /teams-nudge  — dedicated endpoint
+//   if (url.pathname === '/teams-nudge') {
+//     const { webhookUrl, payload } = await request.json();
+//     const r = await fetch(webhookUrl, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+//     return new Response(await r.text(), { status: r.status, headers: corsHeaders });
+//   }
+//
+// Without the proxy endpoint the nudge still fires via no-cors; the message arrives in Teams
+// but the button cannot confirm it — it shows "Sent (unconfirmed)".
+
+async function postTeamsPayload(payload, btn, label){
+  const webhookUrl = jiraConfig.teamsWebhookUrl || document.getElementById('teamsWebhookUrl').value.trim();
+  const proxyUrl   = (jiraConfig.proxyUrl||'').replace(/\/$/,'');
+
+  const markSent = (confirmed=true) => {
+    const txt = confirmed ? '✅ Sent' : '✅ Sent*';
+    const title = confirmed ? 'Confirmed via proxy' : 'Fired (no-cors) — check Teams to confirm';
+    showToast('✅ Teams nudge sent' + (confirmed?'':' (check Teams to confirm)') + ' — ' + label, confirmed?'success':'info');
+    if(btn){
+      btn.innerHTML = txt;
+      btn.title = title;
+      btn.style.background = confirmed ? '#059669' : '#d97706';
+      btn.style.borderColor = confirmed ? '#059669' : '#d97706';
+      btn.disabled = true;
+    }
+  };
+  const markFail = (msg) => {
+    showToast('❌ ' + msg, 'error');
+    if(btn){ btn.disabled=false; btn.innerHTML='💬 Nudge'; }
+  };
+
+  // ── Route 1: proxy /teams-nudge ──
+  if(proxyUrl){
+    try {
+      const resp = await fetch(proxyUrl + '/teams-nudge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ webhookUrl, payload }),
+        signal: AbortSignal.timeout(12000)
+      });
+      const txt = await resp.text().catch(() => '');
+      if(resp.ok || txt === '1' || txt.toLowerCase().includes('ok')){
+        markSent(true); return;
+      }
+      console.warn('Proxy /teams-nudge returned', resp.status, txt, '— trying /proxy-post');
+    } catch(e){
+      console.warn('Proxy /teams-nudge failed:', e.message, '— trying /proxy-post');
+    }
+
+    // ── Route 2: generic proxy /proxy-post ──
+    // Worker code:  if(url.pathname==='/proxy-post'){
+    //   const {targetUrl,body,headers}=await request.json();
+    //   const r=await fetch(targetUrl,{method:'POST',headers,body:JSON.stringify(body)});
+    //   return new Response(await r.text(),{status:r.status,headers:corsHeaders});
+    // }
+    try {
+      const resp2 = await fetch(proxyUrl + '/proxy-post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetUrl: webhookUrl,
+          headers: { 'Content-Type': 'application/json' },
+          body: payload
+        }),
+        signal: AbortSignal.timeout(12000)
+      });
+      const txt2 = await resp2.text().catch(() => '');
+      if(resp2.ok || txt2 === '1' || txt2.toLowerCase().includes('ok')){
+        markSent(true); return;
+      }
+      console.warn('Proxy /proxy-post returned', resp2.status, txt2, '— falling back to no-cors');
+    } catch(e2){
+      console.warn('Proxy /proxy-post failed:', e2.message, '— falling back to no-cors');
+    }
+  }
+
+  // ── Route 3: no-cors direct ──
+  // The browser sends the POST; Teams processes it.
+  // We cannot read the response due to CORS, so we mark "unconfirmed".
+  // The message DOES arrive in Teams — this is the standard browser limitation.
+  try {
+    await fetch(webhookUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    markSent(false); // optimistic — message sent, can't confirm
+  } catch(err){
+    markFail('Request failed — check your Teams Webhook URL is correct. (' + err.message + ')');
+  }
+}
+
+async function sendSingleTeamsNudge(issueKey, rowIdx){
+  const webhookUrl = jiraConfig.teamsWebhookUrl || document.getElementById('teamsWebhookUrl').value.trim();
+  if(!webhookUrl){
+    showToast('No Teams Webhook URL — paste one in the field above','error');
+    return;
+  }
+  const overdue = getOverdueStories();
+  const iss = overdue.find(i=>i.key===issueKey);
+  if(!iss){ showToast('Issue not found','error'); return; }
+
+  const btn = document.getElementById('nudgeBtn_' + rowIdx);
+  if(btn){ btn.disabled=true; btn.innerHTML='⏳ Sending…'; }
+
+  const today = new Date();
+  const due = iss.dueDate||iss.requiredByDate;
+  const days = Math.abs(Math.floor((parseDate(due)-today)/86400000));
+  const custom = document.getElementById('teamsCustomMsg').value.trim() ||
+    'Please update your story status in Jira — it appears to be overdue. 🙏';
+
+  const payload = {
+    "@type": "MessageCard",
+    "@context": "https://schema.org/extensions",
+    "themeColor": "EF4444",
+    "summary": "Overdue Nudge: " + iss.key,
+    "sections": [{
+      "activityTitle": "🚨 Overdue Story Nudge — " + iss.key,
+      "activitySubtitle": "Jira Roadmaps - AI & Automation • " + today.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),
+      "activityImage": "https://img.icons8.com/color/48/jira.png",
+      "facts": [
+        { title: "Story",      value: iss.key + ": " + iss.summary },
+        { title: "Assignee",   value: iss.assignee||'Unassigned' },
+        { title: "Overdue by", value: days + " day" + (days===1?'':'s') },
+        { title: "Due Date",   value: due ? parseDate(due).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—' }
+      ],
+      "text": custom
+    }]
+  };
+
+  await postTeamsPayload(payload, btn, iss.key + " (" + (iss.assignee||'Unassigned') + ")");
+}
+
+function previewTeamsNudge(){
+  const overdue = getOverdueStories();
+  if(!overdue.length){ showToast('No overdue stories to nudge','info'); return; }
+  const msg = buildTeamsPayload(overdue, true);
+  alert('Preview (Adaptive Card payload):\n\n'+JSON.stringify(msg,null,2).slice(0,800)+'...');
+}
+
+function buildTeamsPayload(overdueList, isPreview=false){
+  const today = new Date();
+  const custom = document.getElementById('teamsCustomMsg').value.trim() ||
+    'Please update your story status in Jira — it appears to be overdue. 🙏';
+  const facts = overdueList.slice(0,12).map(i=>{
+    const due = i.dueDate||i.requiredByDate;
+    const days = Math.abs(Math.floor((parseDate(due)-today)/86400000));
+    return { title: i.key, value: `${i.summary} — ${i.assignee||'Unassigned'} (${days}d overdue)` };
+  });
+  return {
+    "@type": "MessageCard",
+    "@context": "https://schema.org/extensions",
+    "themeColor": "EF4444",
+    "summary": "Overdue Story Nudge from Jira Roadmaps - AI & Automation",
+    "sections": [{
+      "activityTitle": "🚨 Overdue Stories — Action Required",
+      "activitySubtitle": `Jira Roadmaps - AI & Automation • ${today.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}`,
+      "activityImage": "https://img.icons8.com/color/48/jira.png",
+      "facts": facts,
+      "text": custom
+    }]
+  };
+}
+
+async function sendTeamsNudges(){
+  const webhookUrl = jiraConfig.teamsWebhookUrl || document.getElementById('teamsWebhookUrl').value.trim();
+  if(!webhookUrl){
+    showToast('No Teams Webhook URL — paste one in the field above','error');
+    openTeamsModal();
+    return;
+  }
+  const overdue = getOverdueStories();
+  if(!overdue.length){ showToast('No overdue stories to nudge','info'); return; }
+  const payload = buildTeamsPayload(overdue);
+  const statusEl = document.getElementById('teamsSentStatus');
+  statusEl.style.display='none';
+  showToast('Sending Teams nudge…','info');
+  // postTeamsPayload handles toast + CORS — pass a synthetic btn so we can
+  // update the status bar after it resolves.
+  const syntheticBtn = {
+    set innerHTML(v){ if(v.startsWith('✅')){ statusEl.style.display='flex'; statusEl.className='nudge-sent'; statusEl.innerHTML = v + ' for ' + overdue.length + ' stories at ' + new Date().toLocaleTimeString(); } },
+    set disabled(v){},
+    set style(v){},
+    get style(){ return {set background(v){}, set borderColor(v){}}; }
+  };
+  await postTeamsPayload(payload, syntheticBtn, overdue.length + ' overdue stories');
+}
+
+// ══════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════
+
+
+
+
+</script>
+</body>
+</html>
